@@ -1,0 +1,24 @@
+import { Sidebar } from './sidebar'
+import { Header } from './header'
+import { GetStarted } from './get-started'
+import { Statistics } from './statistics'
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <div className="flex-1 flex overflow-hidden">
+          <main className="flex-1 overflow-y-auto p-4">
+            {children}
+          </main>
+          <aside className="w-80 bg-white p-4 overflow-y-auto">
+            <GetStarted />
+            <Statistics />
+          </aside>
+        </div>
+      </div>
+    </div>
+  )
+}
