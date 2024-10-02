@@ -1,11 +1,11 @@
 import Layout from '@/components/layout'
+import EmailList from '@/components/email-list'
 
-export default function AllEmailsPage() {
+export default function EmailsPage() {
   return (
     <Layout>
       <h1 className="text-2xl font-bold mb-4">All Emails</h1>
-      <p>Here you can view and manage all your emails.</p>
-      {/* Add more content specific to the All Emails page */}
+      <EmailList />
     </Layout>
   )
 }
