@@ -27,21 +27,22 @@ export async function GET(request: Request) {
       date: email.payload.headers.find((header: any) => header.name === 'Date')?.value || '',
       from: email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown',
       fromDomain: extractDomain(email.payload.headers.find((header: any) => header.name === 'Authentication-Results')?.value || 'Unknown'),
-      isSubscription: email.payload.headers.some((header: any) => 
-        header.name === 'List-Unsubscribe' || 
-        (header.name === 'Precedence' && (header.value === 'bulk' || header.value === 'list')) ||
-        header.name === 'X-Mailer' || 
-        header.name === 'X-Newsletter' ||
-        (header.name === 'From' && 
-         (header.value.includes('@news.') || header.value.includes('@mailchimp.com') || 
-          header.value.includes('@tesla.com') || header.value.includes('@newsletter.') || 
-          header.value.includes('@marketing.') || header.value.includes('@info.') || 
-          header.value.includes('@updates.'))) ||
-        (header.name === 'Subject' && 
-         (header.value.toLowerCase().includes('newsletter') || 
-          header.value.toLowerCase().includes('digest') ))
-    ) || email.labelIds?.includes('CATEGORY_PROMOTIONS')
-       
+      isSubscription: !email.payload.headers.some((header: any) => header.name === 'Subscribed') && (
+        email.payload.headers.some((header: any) =>
+          header.name === 'List-Unsubscribe' ||
+          (header.name === 'Precedence' && (header.value === 'bulk' || header.value === 'list')) ||
+          header.name === 'X-Mailer' ||
+          header.name === 'X-Newsletter' ||
+          (header.name === 'From' &&
+            (header.value.includes('@news.') || header.value.includes('@mailchimp.com') ||
+              header.value.includes('@tesla.com') || header.value.includes('@newsletter.') ||
+              header.value.includes('@marketing.') || header.value.includes('@info.') ||
+              header.value.includes('@updates.'))) ||
+          (header.name === 'Subject' &&
+            (header.value.toLowerCase().includes('newsletter') ||
+              header.value.toLowerCase().includes('digest')))
+        ) || email.labelIds?.includes('CATEGORY_PROMOTIONS')
+      )
     }));
 
     return NextResponse.json(extractedEmails);
@@ -49,6 +50,28 @@ export async function GET(request: Request) {
     console.error('Error fetching emails:', error);
     return NextResponse.json({ error: 'Failed to fetch emails' }, { status: 500 });
   }
+}
+
+export async function POST(request: Request) {
+    const { email } = await request.json();
+    // Get emails.json file contents
+    const filePath = path.join(process.cwd(), 'src', 'data', 'emails.json');
+    const data = await fs.readFile(filePath, 'utf-8');
+    const emails: any[] = JSON.parse(data);
+
+    // Update emails with the provided email address
+    const updatedEmails = emails.map((emailObj) => {
+      const fromHeader = emailObj.payload.headers.find((header: any) => header.name === 'From');
+      if (fromHeader && fromHeader.value.includes(email)) {
+        // Add the "Subscribed" header
+        emailObj.payload.headers.push({ name: 'Subscribed', value: 'This was kept' });
+      }
+      return emailObj;
+    });
+
+    // Write updated emails.json file
+    await fs.writeFile(filePath, JSON.stringify(updatedEmails, null, 2));
+    return NextResponse.json({ code: 200, message: 'Emails updated successfully' });
 }
 
 function extractDomain(value: string) {

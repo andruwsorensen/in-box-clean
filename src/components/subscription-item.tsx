@@ -48,6 +48,20 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
         }
       }
 
+      if (!isUnsubscribe) {
+        const response = await fetch('/api/subscriptions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update JSON file');
+        }
+      }
+
       // Handle successful confirmation
       console.log(`${isUnsubscribe ? 'Unsubscribed' : 'Kept subscription'} successfully`);
       setIsUnsubscribed(isUnsubscribe);
@@ -57,6 +71,8 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
       if (isUnsubscribe) {
         onUnsubscribedCountUpdate(1);
       }
+
+
     } catch (error) {
       console.error(`Error ${isUnsubscribe ? 'unsubscribing' : 'keeping subscription'}:`, error);
     } finally {
