@@ -10,7 +10,7 @@ interface EmailDetails {
   date: string;
   from: string;
   fromDomain: string;
-  isSubscribed: boolean;
+  isSubscription: boolean;
 }
 
 export async function GET(request: Request) {
@@ -27,7 +27,21 @@ export async function GET(request: Request) {
       date: email.payload.headers.find((header: any) => header.name === 'Date')?.value || '',
       from: email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown',
       fromDomain: extractDomain(email.payload.headers.find((header: any) => header.name === 'Authentication-Results')?.value || 'Unknown'),
-      isSubscribed: email.payload.headers.some((header: any) => header.name === 'List-Unsubscribe'),
+      isSubscription: email.payload.headers.some((header: any) => 
+        header.name === 'List-Unsubscribe' || 
+        (header.name === 'Precedence' && (header.value === 'bulk' || header.value === 'list')) ||
+        header.name === 'X-Mailer' || 
+        header.name === 'X-Newsletter' ||
+        (header.name === 'From' && 
+         (header.value.includes('@news.') || header.value.includes('@mailchimp.com') || 
+          header.value.includes('@tesla.com') || header.value.includes('@newsletter.') || 
+          header.value.includes('@marketing.') || header.value.includes('@info.') || 
+          header.value.includes('@updates.'))) ||
+        (header.name === 'Subject' && 
+         (header.value.toLowerCase().includes('newsletter') || 
+          header.value.toLowerCase().includes('digest') ))
+    ) || email.labelIds?.includes('CATEGORY_PROMOTIONS')
+       
     }));
 
     return NextResponse.json(extractedEmails);

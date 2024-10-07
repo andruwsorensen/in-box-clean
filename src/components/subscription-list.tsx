@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { SubscriptionItem } from './subscription-item'
 import { EmailDetails } from '../types'
+import { useStatistics } from './layout'
 
 interface GroupedEmail {
   name: string;
@@ -13,18 +14,19 @@ interface GroupedEmail {
 
 export function SubscriptionList() {
   const [groupedEmails, setGroupedEmails] = useState<GroupedEmail[]>([]);
+  const { handleDeletedCountUpdate, handleUnsubscribedCountUpdate } = useStatistics();
 
   useEffect(() => {
     const fetchEmails = async () => {
       try {
         console.log('Fetching emails...');
-        const response = await fetch('/api/subscriptions') ;
+        const response = await fetch('/api/subscriptions');
         if (!response.ok) {
           throw new Error('Failed to fetch emails');
         }
         const emails: EmailDetails[] = await response.json();
         console.log('Fetched emails:', emails);
-        const subscribedEmails = emails.filter(email => email.isSubscribed);
+        const subscribedEmails = emails.filter(email => email.isSubscription);
         const grouped = groupEmailsBySender(subscribedEmails);
         console.log('Grouped emails:', grouped);
         setGroupedEmails(grouped);
@@ -63,7 +65,12 @@ export function SubscriptionList() {
   return (
     <div className="space-y-4">
       {groupedEmails.map((sub, index) => (
-        <SubscriptionItem key={index} {...sub} />
+        <SubscriptionItem 
+          key={index} 
+          {...sub} 
+          onDeletedCountUpdate={handleDeletedCountUpdate}
+          onUnsubscribedCountUpdate={handleUnsubscribedCountUpdate}
+        />
       ))}
     </div>
   )

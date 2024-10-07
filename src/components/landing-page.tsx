@@ -3,23 +3,23 @@
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from 'next/navigation';
 import logo from "../public/images/logo.png"
 import { useState } from "react"
 
 export function LandingPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/auth');
-      if (response.redirected) {
-        window.location.href = response.url;
-        return;
-      }
       const data = await response.json();
       if (data.authUrl) {
         window.location.href = data.authUrl;
+      } else {
+        router.push('/main');
       }
     } catch (error) {
       console.error('Error during authentication:', error);

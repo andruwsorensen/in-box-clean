@@ -6,5 +6,5 @@ export interface EmailDetails {
     date: string;
     from: string;
     fromDomain: string;
-    isSubscribed: boolean;
+    isSubscription: boolean;
 }
