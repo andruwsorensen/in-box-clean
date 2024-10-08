@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { SubscriptionItem } from './subscription-item'
 import { EmailDetails } from '../types'
+import { useStats } from '../contexts/StatsContext'
 
 interface GroupedEmail {
   name: string;
@@ -13,6 +14,7 @@ interface GroupedEmail {
 
 export function SubscriptionList() {
   const [groupedEmails, setGroupedEmails] = useState<GroupedEmail[]>([]);
+  const { incrementTrigger } = useStats();
 
   useEffect(() => {
     const fetchEmails = async () => {
@@ -70,6 +72,8 @@ export function SubscriptionList() {
     if (!response.ok) {
       throw new Error('Failed to update deleted stats');
     }
+
+    incrementTrigger();
   };
 
   const handleUnsubscribedCountUpdate = async (count: number) => {
@@ -84,6 +88,8 @@ export function SubscriptionList() {
     if (!response.ok) {
       throw new Error('Failed to update unsubscribed stats');
     }
+
+    incrementTrigger();
   };
 
   console.log('Rendering SubscriptionList with groupedEmails:', groupedEmails);

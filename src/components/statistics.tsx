@@ -1,24 +1,33 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import statsData from '../data/stats.json'
+import React, { useEffect, useState } from 'react'
+import { useStats } from '../contexts/StatsContext'
+
+interface Stats {
+  unsubscribed: number;
+  deleted: number;
+}
 
 export function Statistics() {
-  const [stats, setStats] = useState(statsData)
+  const [stats, setStats] = useState<Stats>({ unsubscribed: 0, deleted: 0 });
+  const { triggerRefetch } = useStats();
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/stats');
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+      const data = await response.json();
+      setStats(data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/stats')
-        const data = await response.json()
-        setStats(data)
-      } catch (error) {
-        console.error('Error fetching stats:', error)
-      }
-    }
-
-    fetchStats()
-  }, [])
+    fetchStats();
+  }, [triggerRefetch]);
 
   return (
     <div>
