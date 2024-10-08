@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { SubscriptionItem } from './subscription-item'
 import { EmailDetails } from '../types'
-import { useStatistics } from './layout'
 
 interface GroupedEmail {
   name: string;
@@ -14,7 +13,6 @@ interface GroupedEmail {
 
 export function SubscriptionList() {
   const [groupedEmails, setGroupedEmails] = useState<GroupedEmail[]>([]);
-  const { handleDeletedCountUpdate, handleUnsubscribedCountUpdate } = useStatistics();
 
   useEffect(() => {
     const fetchEmails = async () => {
@@ -58,6 +56,34 @@ export function SubscriptionList() {
     });
 
     return Array.from(groupedMap.values()).sort((a, b) => b.count - a.count);
+  };
+
+  const handleDeletedCountUpdate = async (count: number) => {
+    const response = await fetch('/api/stats', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ type: 'deleted', count })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update deleted stats');
+    }
+  };
+
+  const handleUnsubscribedCountUpdate = async (count: number) => {
+    const response = await fetch('/api/stats', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ type: 'unsubscribed', count })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update unsubscribed stats');
+    }
   };
 
   console.log('Rendering SubscriptionList with groupedEmails:', groupedEmails);
