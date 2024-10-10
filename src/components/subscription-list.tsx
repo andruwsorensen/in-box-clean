@@ -10,6 +10,7 @@ interface GroupedEmail {
   email: string;
   count: number;
   domain: string;
+  from: string;
 }
 
 export function SubscriptionList() {
@@ -42,17 +43,16 @@ export function SubscriptionList() {
     const groupedMap = new Map<string, GroupedEmail>();
 
     emails.forEach(email => {
-      console.log(email.fromDomain);
-      const key = email.from;
+      const key = email.fromEmail;
       if (groupedMap.has(key)) {
         groupedMap.get(key)!.count++;
       } else {
-        const [name, domain] = key.split('@');
         groupedMap.set(key, {
-          name: name,
+          name: email.fromName,
           email: key,
           count: 1,
-          domain: email.fromDomain
+          domain: email.fromDomain,
+          from: email.from
         });
       }
     });
@@ -60,33 +60,18 @@ export function SubscriptionList() {
     return Array.from(groupedMap.values()).sort((a, b) => b.count - a.count);
   };
 
-  const handleDeletedCountUpdate = async (count: number) => {
+  const handleStatsUpdate = async (deletedCount: number, unsubscribedCount: number) => {
+    console.log('handleStatsUpdate', { deletedCount, unsubscribedCount });
     const response = await fetch('/api/stats', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ type: 'deleted', count })
+      body: JSON.stringify({ deleted: deletedCount, unsubscribed: unsubscribedCount })
     });
 
     if (!response.ok) {
-      throw new Error('Failed to update deleted stats');
-    }
-
-    incrementTrigger();
-  };
-
-  const handleUnsubscribedCountUpdate = async (count: number) => {
-    const response = await fetch('/api/stats', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ type: 'unsubscribed', count })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update unsubscribed stats');
+      throw new Error('Failed to update stats');
     }
 
     incrementTrigger();
@@ -100,8 +85,7 @@ export function SubscriptionList() {
         <SubscriptionItem 
           key={index} 
           {...sub} 
-          onDeletedCountUpdate={handleDeletedCountUpdate}
-          onUnsubscribedCountUpdate={handleUnsubscribedCountUpdate}
+          onStatsUpdate={handleStatsUpdate}
         />
       ))}
     </div>

@@ -5,6 +5,8 @@ export interface EmailDetails {
     snippet: string;
     date: string;
     from: string;
+    fromName: string;
+    fromEmail: string;
     fromDomain: string;
     isSubscription: boolean;
 }

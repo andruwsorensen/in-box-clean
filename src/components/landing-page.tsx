@@ -19,7 +19,8 @@ export function LandingPage() {
       if (data.authUrl) {
         window.location.href = data.authUrl;
       } else {
-        router.push('/main');
+        // Throw an error if the response is not a valid URL
+        throw new Error('Invalid response from /api/auth');
       }
     } catch (error) {
       console.error('Error during authentication:', error);

@@ -29,21 +29,12 @@ export async function GET(request: Request) {
     const tokenPath = path.join(process.cwd(), 'src', 'data', 'token.json');
     let token;
 
-    try {
-      token = JSON.parse(await fs.readFile(tokenPath, 'utf8'));
-      oAuth2Client.setCredentials(token);
-      
-      // If we have a valid token, redirect to /main
-      return NextResponse.json({status: 200});
-    } catch (error) {
-      // If token.json doesn't exist or is invalid, generate a new auth URL
-      const authUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-      });
+    const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: SCOPES,
+    });
 
       return NextResponse.json({ authUrl }, { status: 200 });
-    }
   } catch (error) {
     console.error('Authentication error:', error);
     return NextResponse.json({ error: 'Authentication failed' }, { status: 500 });

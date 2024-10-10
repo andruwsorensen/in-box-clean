@@ -10,8 +10,8 @@ interface SubscriptionItemProps {
   email: string
   count: number
   domain: string
-  onDeletedCountUpdate: (count: number) => void
-  onUnsubscribedCountUpdate: (count: number) => void
+  from: string
+  onStatsUpdate: (deletedCount: number, unsubscribedCount: number) => void
 }
 
 export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ 
@@ -19,8 +19,8 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
   email, 
   count, 
   domain,
-  onDeletedCountUpdate,
-  onUnsubscribedCountUpdate
+  from,
+  onStatsUpdate
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isUnsubscribed, setIsUnsubscribed] = useState(false)
@@ -29,22 +29,62 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
 
   const handleConfirmation = async (deleteEmails: boolean, isUnsubscribe: boolean) => {
     try {
+      let deletedCount = 0;
+      let unsubscribedCount = 0;
+
+      if (isUnsubscribe) {
+        // Fetch email content
+        const emailContentResponse = await fetch('/api/email-content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ from })
+        });
+
+        if (!emailContentResponse.ok) {
+          throw new Error('Failed to fetch email content');
+        }
+
+        const { emailContent } = await emailContentResponse.json();
+
+        // Call unsubscribe API with the fetched email content
+        const unsubscribeResponse = await fetch('/api/unsubscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            email: from,
+            emailContent
+          })
+        });
+
+        if (!unsubscribeResponse.ok) {
+          throw new Error('Failed to unsubscribe');
+        }
+
+        const unsubscribeResult = await unsubscribeResponse.json();
+        console.log('Unsubscribe result:', unsubscribeResult);
+        unsubscribedCount = 1;
+      }
+
       if (deleteEmails) {
         const response = await fetch('/api/emails/delete', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ from })
         });
 
         if (!response.ok) {
-          throw new Error('Failed to unsubscribe and delete emails');
+          throw new Error('Failed to delete emails');
         }
 
         const result = await response.json();
         if (result.deletedCount) {
-          onDeletedCountUpdate(result.deletedCount);
+          deletedCount = result.deletedCount;
         }
       }
 
@@ -54,7 +94,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ from })
         });
 
         if (!response.ok) {
@@ -68,10 +108,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
       setIsKeepingSubscription(!isUnsubscribe);
       setIsUnsubscribeAction(isUnsubscribe);
 
-      if (isUnsubscribe) {
-        onUnsubscribedCountUpdate(1);
-      }
-
+      onStatsUpdate(deletedCount, unsubscribedCount);
 
     } catch (error) {
       console.error(`Error ${isUnsubscribe ? 'unsubscribing' : 'keeping subscription'}:`, error);

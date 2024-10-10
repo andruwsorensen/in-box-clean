@@ -6,7 +6,9 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
     const oAuth2Client = await getOAuth2Client();
 
-    const { email } = await request.json();
+    const { from } = await request.json();
+    const email = from;
+    console.log('Email to delete:', email);
     const ids = await getEmailIds(oAuth2Client, email);
 
     if (!ids || !Array.isArray(ids)) {

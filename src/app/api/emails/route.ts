@@ -23,6 +23,16 @@ export async function GET(request: Request) {
             JSON.stringify(validEmails, null, 2)
         );
 
+        const stats = {
+            unsubscribed: 0,
+            deleted: 0
+        };
+
+        await fs.writeFile(
+            path.join(process.cwd(), 'src', 'data', 'stats.json'),
+            JSON.stringify(stats, null, 2)
+        );
+
         return NextResponse.json(validEmails);
     } catch (error) {
         console.error('Error processing emails:', error);

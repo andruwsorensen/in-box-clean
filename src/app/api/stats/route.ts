@@ -20,17 +20,21 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const { type, count } = await request.json();
         const statsFilePath = path.join(process.cwd(), 'src', 'data', 'stats.json');
-        const stats: Stats = JSON.parse(await fs.readFile(statsFilePath, 'utf-8'));
-        if (type === 'deleted') {
-            stats.deleted += count;
-        } else if (type === 'unsubscribed') {
-            stats.unsubscribed += count;
-        } else {
-            return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+        let stats: Stats = JSON.parse(await fs.readFile(statsFilePath, 'utf-8'));
+
+        const { deleted, unsubscribed } = await request.json();
+        console.log('Updating stats:', { deleted, unsubscribed });
+
+        if (typeof deleted === 'number') {
+            stats.deleted += deleted;
         }
+        if (typeof unsubscribed === 'number') {
+            stats.unsubscribed += unsubscribed;
+        }
+
         await fs.writeFile(statsFilePath, JSON.stringify(stats, null, 2));
+        console.log('Updated stats:', stats);
         return NextResponse.json({ code: 200, message: 'Stats updated successfully' });
     } catch (error) {
         console.error('Error updating stats:', error);

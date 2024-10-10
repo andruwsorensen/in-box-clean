@@ -8,7 +8,8 @@ interface EmailDetails {
   subject: string;
   snippet: string;
   date: string;
-  from: string;
+  fromName: string;
+  fromEmail: string;
   fromDomain: string;
   isSubscription: boolean;
 }
@@ -26,6 +27,8 @@ export async function GET(request: Request) {
       snippet: email.snippet,
       date: email.payload.headers.find((header: any) => header.name === 'Date')?.value || '',
       from: email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown',
+      fromName: extractName(email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown'),
+      fromEmail: extractEmail(email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown'),
       fromDomain: extractDomain(email.payload.headers.find((header: any) => header.name === 'Authentication-Results')?.value || 'Unknown'),
       isSubscription: !email.payload.headers.some((header: any) => header.name === 'Subscribed') && (
         email.payload.headers.some((header: any) =>
@@ -53,7 +56,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-    const { email } = await request.json();
+    const { from } = await request.json();
+    console.log(from);
+    const email = from;
     // Get emails.json file contents
     const filePath = path.join(process.cwd(), 'src', 'data', 'emails.json');
     const data = await fs.readFile(filePath, 'utf-8');
@@ -72,6 +77,28 @@ export async function POST(request: Request) {
     // Write updated emails.json file
     await fs.writeFile(filePath, JSON.stringify(updatedEmails, null, 2));
     return NextResponse.json({ code: 200, message: 'Emails updated successfully' });
+}
+
+function extractName(value: string) {
+  const nameRegex = /^(.*?)\s*<.*>$/;
+  const match = value.match(nameRegex);
+  if (match) {
+    return match[1].trim();
+  } else {
+    // If the value doesn't match the regex, assume it's just the name
+    return value.trim().split('@')[0];
+  }
+}
+
+function extractEmail(value: string) {
+  const emailRegex = /<(.*?)>/;
+  const match = value.match(emailRegex);
+  if (match) {
+    return match[1].trim();
+  } else {
+    // If the value doesn't match the regex, assume it's just the email
+    return value.trim();
+  }
 }
 
 function extractDomain(value: string) {

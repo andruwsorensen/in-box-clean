@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { OAuth2Client } from "google-auth-library";
-import { google } from "googleapis";
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -31,7 +30,10 @@ export async function GET(request: Request) {
     const tokenPath = path.join(process.cwd(), 'src', 'data', 'token.json');
     await fs.writeFile(tokenPath, JSON.stringify(tokens));
 
-    return NextResponse.redirect(new URL('/main', request.url));
+    const mainUrl = new URL('/main', request.url);
+    mainUrl.searchParams.set('showModal', 'true');
+
+    return NextResponse.redirect(mainUrl);
   } catch (error) {
     console.error('Token exchange error:', error);
     return NextResponse.json({ error: 'Failed to exchange authorization code for tokens' }, { status: 500 });
