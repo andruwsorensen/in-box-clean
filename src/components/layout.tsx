@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Sidebar } from './sidebar'
 import { Header } from './header'
@@ -13,7 +13,7 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
-export default function Layout({ children }: LayoutProps) {
+function LayoutContent({ children }: LayoutProps) {
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -64,5 +64,13 @@ export default function Layout({ children }: LayoutProps) {
       </div>
       {showModal && <WelcomeModal />}
     </StatsProvider>
+  )
+}
+
+export default function Layout({ children }: LayoutProps) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LayoutContent>{children}</LayoutContent>
+    </Suspense>
   )
 }

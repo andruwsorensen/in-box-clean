@@ -8,6 +8,7 @@ interface EmailDetails {
   subject: string;
   snippet: string;
   date: string;
+  from: string;
   fromName: string;
   fromEmail: string;
   fromDomain: string;
@@ -48,6 +49,7 @@ export async function GET() {
       subject: email.payload.headers.find((header) => header.name === 'Subject')?.value || 'No Subject',
       snippet: email.snippet,
       date: new Date(email.payload.headers.find((header) => header.name === 'Date')?.value || '').toLocaleString('en-US', { month: 'short', year: 'numeric' }) || '',
+      from: email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown',
       fromName: extractName(email.payload.headers.find((header) => header.name === 'From')?.value || 'Unknown'),
       fromEmail: extractEmail(email.payload.headers.find((header) => header.name === 'From')?.value || 'Unknown'),
       fromDomain: extractDomain(email.payload.headers.find((header) => header.name === 'Authentication-Results')?.value || 'Unknown'),

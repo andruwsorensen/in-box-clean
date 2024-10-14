@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     const emails: Email[] = JSON.parse(data);
 
     const email = emails.find((email) => {
+      // print to console the first email header
       const fromHeader = email.payload.headers.find((header) => header.name === 'From');
       return fromHeader && fromHeader.value.includes(from);
     });

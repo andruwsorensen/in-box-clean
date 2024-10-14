@@ -36,6 +36,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
 
       if (isUnsubscribe) {
         // Fetch email content
+        console.log("from", from);
         const emailContentResponse = await fetch('/api/email-content', {
           method: 'POST',
           headers: {
