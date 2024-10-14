@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import { OAuth2Client } from "google-auth-library";
 import fs from 'fs/promises';
 import path from 'path';

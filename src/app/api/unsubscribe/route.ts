@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 // import { simpleParser } from 'mailparser';
 // import nodemailer from 'nodemailer';
 import { google, gmail_v1 } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
 import { getOAuth2Client } from '../utils/auth';
 
 const gmail = google.gmail('v1');
 
-async function createBlockFilter(auth: any, gmail: gmail_v1.Gmail, sender: string) {
+async function createBlockFilter(auth: OAuth2Client, gmail: gmail_v1.Gmail, sender: string) {
     try {
       const filter = {
         criteria: {
@@ -31,7 +32,7 @@ async function createBlockFilter(auth: any, gmail: gmail_v1.Gmail, sender: strin
   }
 
 export async function POST(request: Request) {
-  const { email, emailContent } = await request.json();
+  const { email } = await request.json();
 
   // // 1. Check for unsubscribe link in headers
   // const parsedEmail = await simpleParser(emailContent);

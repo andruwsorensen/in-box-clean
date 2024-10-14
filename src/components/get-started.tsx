@@ -5,7 +5,7 @@ export function GetStarted() {
     <div className="mb-8">
       <h2 className="text-xl font-semibold mb-4">Get Started</h2>
       <p className="text-sm text-gray-600 mb-4">
-        Follow this 3 simple steps and something more, but I don't know what yet?
+        Follow this 3 simple steps and something more, but I do not know what yet?
       </p>
       <div className="space-y-2">
         <button className="w-full py-2 px-4 bg-gray-800 text-white rounded flex items-center">

@@ -1,12 +1,10 @@
 import { getOAuth2Client } from '@/app/api/utils/auth';
-import { google } from 'googleapis';
 import fs from 'fs/promises';
 import path from 'path';
-import { OAuth2Client } from 'google-auth-library';
 import { NextResponse } from 'next/server';
 import { listMessages, getEmailDetails, EmailDetails } from '@/app/api/utils/gmail';
 
-export async function GET(request: Request) {
+export async function GET() {
     try {
         const oAuth2Client = await getOAuth2Client();
 
@@ -40,7 +38,7 @@ export async function GET(request: Request) {
     }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE() {
     try {
         const oAuth2Client = await getOAuth2Client();
         const emails = await listMessages(oAuth2Client);

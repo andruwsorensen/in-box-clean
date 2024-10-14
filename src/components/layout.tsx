@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Sidebar } from './sidebar'
 import { Header } from './header'
-import { GetStarted } from './get-started'
+// import { GetStarted } from './get-started'
 import { Statistics } from './statistics'
 import { StatsProvider } from '../contexts/StatsContext'
 import WelcomeModal from './welcome-modal'

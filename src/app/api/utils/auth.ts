@@ -4,14 +4,6 @@ import { google } from 'googleapis';
 import fs from 'fs/promises';
 import path from 'path';
 
-const SCOPES = [
-  'https://www.googleapis.com/auth/gmail.readonly',
-  'https://www.googleapis.com/auth/gmail.settings.basic',
-  'https://www.googleapis.com/auth/gmail.settings.sharing',
-  'https://www.googleapis.com/auth/gmail.modify',
-  'https://mail.google.com/',
-];
-
 const gmail = google.gmail('v1');
 
 export const getOAuth2Client = async (): Promise<OAuth2Client> => {
@@ -35,7 +27,7 @@ export const getOAuth2Client = async (): Promise<OAuth2Client> => {
   return oAuth2Client;
 };
 
-export const batchDeleteMessages = async (auth: any, messageIds: string[]) => {
+export const batchDeleteMessages = async (auth: OAuth2Client, messageIds: string[]) => {
     try {
       await gmail.users.messages.batchDelete({
         userId: 'me',

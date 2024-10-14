@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
 import { OAuth2Client } from "google-auth-library";
-import { google } from "googleapis";
 import fs from 'fs/promises';
 import path from 'path';
-import { stat } from 'fs';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/gmail.readonly',
@@ -15,7 +13,7 @@ const SCOPES = [
 
 let oAuth2Client: OAuth2Client;
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // Load credentials.json file
     const credentialsPath = path.join(process.cwd(), 'src', 'data', 'credentials.json');
@@ -24,10 +22,6 @@ export async function GET(request: Request) {
     const { client_secret, client_id, redirect_uris } = credentials.web;
     // Create OAuth2 client with credentials
     oAuth2Client = new OAuth2Client(client_id, client_secret, redirect_uris[0]);
-
-    // Check for token.json file in data directory
-    const tokenPath = path.join(process.cwd(), 'src', 'data', 'token.json');
-    let token;
 
     const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',

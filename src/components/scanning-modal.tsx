@@ -36,10 +36,11 @@ export function ScanningModal() {
     <ModalWrapper 
       title="Scanning your inbox 🔎"
       onNext={handleNext}
+      isOpen={true}
     >
       <div className="space-y-6">
         <CardDescription className="text-center">
-          We're analyzing your inbox to identify potential unsubscribe candidates.
+          We are analyzing your inbox to identify potential unsubscribe candidates.
         </CardDescription>
         <div className="relative w-32 h-32 mx-auto">
           <svg className="w-full h-full" viewBox="0 0 100 100">

@@ -3,12 +3,10 @@
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from 'next/navigation';
 import logo from "../public/images/logo.png"
 import { useState } from "react"
 
 export function LandingPage() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {

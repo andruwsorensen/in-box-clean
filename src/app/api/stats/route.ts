@@ -7,7 +7,7 @@ export interface Stats {
     deleted: number;
 }
 
-export async function GET(request: Request) {
+export async function GET() {
     try {
         const statsFilePath = path.join(process.cwd(), 'src', 'data', 'stats.json');
         const stats: Stats = JSON.parse(await fs.readFile(statsFilePath, 'utf-8'));
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const statsFilePath = path.join(process.cwd(), 'src', 'data', 'stats.json');
-        let stats: Stats = JSON.parse(await fs.readFile(statsFilePath, 'utf-8'));
+        const stats: Stats = JSON.parse(await fs.readFile(statsFilePath, 'utf-8'));
 
         const { deleted, unsubscribed } = await request.json();
         console.log('Updating stats:', { deleted, unsubscribed });

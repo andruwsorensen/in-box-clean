@@ -34,6 +34,7 @@ const EmailList: React.FC = () => {
   }
 
   if (error) {
+    console.log(error);
     return <div>{error}</div>;
   }
 

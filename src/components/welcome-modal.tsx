@@ -39,7 +39,7 @@ export default function WelcomeModal() {
           />
         </div>
         <CardDescription className="text-center">
-          Brief Description with value proposition here. But for now this because I don't know what to write
+          InBoxClean is an app that helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages. With its intelligent scanning and easy-to-use interface, you can regain control over your inbox and enjoy a more organized and stress-free email experience.
         </CardDescription>
       </div>
     </ModalWrapper>

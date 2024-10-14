@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const tokenFilePath = path.join(process.cwd(), 'src', 'data', 'token.json');
     const tokenFileExists = await fs.stat(tokenFilePath).catch(() => false);
