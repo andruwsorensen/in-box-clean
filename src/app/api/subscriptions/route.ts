@@ -25,7 +25,7 @@ export async function GET(request: Request) {
       threadId: email.threadId,
       subject: email.payload.headers.find((header: any) => header.name === 'Subject')?.value || 'No Subject',
       snippet: email.snippet,
-      date: email.payload.headers.find((header: any) => header.name === 'Date')?.value || '',
+      date: new Date(email.payload.headers.find((header: any) => header.name === 'Date')?.value || '').toLocaleString('en-US', { month: 'short', year: 'numeric' }) || '',
       from: email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown',
       fromName: extractName(email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown'),
       fromEmail: extractEmail(email.payload.headers.find((header: any) => header.name === 'From')?.value || 'Unknown'),

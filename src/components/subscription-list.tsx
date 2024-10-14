@@ -11,15 +11,18 @@ interface GroupedEmail {
   count: number;
   domain: string;
   from: string;
+  date: string;
 }
 
 export function SubscriptionList() {
   const [groupedEmails, setGroupedEmails] = useState<GroupedEmail[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { incrementTrigger } = useStats();
 
   useEffect(() => {
     const fetchEmails = async () => {
       try {
+        setIsLoading(true);
         console.log('Fetching emails...');
         const response = await fetch('/api/subscriptions');
         if (!response.ok) {
@@ -33,6 +36,8 @@ export function SubscriptionList() {
         setGroupedEmails(grouped);
       } catch (error) {
         console.error('Error fetching emails:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -46,13 +51,18 @@ export function SubscriptionList() {
       const key = email.fromEmail;
       if (groupedMap.has(key)) {
         groupedMap.get(key)!.count++;
+        // Update the date if the email is older than the current one
+        if (new Date(email.date) > new Date(groupedMap.get(key)!.date)) {
+          groupedMap.get(key)!.date = email.date;
+        }
       } else {
         groupedMap.set(key, {
           name: email.fromName,
           email: key,
           count: 1,
           domain: email.fromDomain,
-          from: email.from
+          from: email.from,
+          date: email.date
         });
       }
     });
@@ -78,6 +88,10 @@ export function SubscriptionList() {
   };
 
   console.log('Rendering SubscriptionList with groupedEmails:', groupedEmails);
+
+  if (isLoading) {
+    return <div>Loading subscriptions...</div>;
+  }
 
   return (
     <div className="space-y-4">

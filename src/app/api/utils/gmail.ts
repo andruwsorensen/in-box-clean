@@ -87,22 +87,20 @@ export const getEmailDetails = async (auth: OAuth2Client, messageId: string): Pr
     }
 };
 
-export const getEmailIds = async (auth: OAuth2Client, email: string): Promise<string[]> => {
+export const getEmailIds = async (email: string): Promise<string[]> => {
     try {
-        const response = await gmail.users.messages.list({
-            userId: 'me',
-            auth,
-            q: `from:${email}`,
-            maxResults: 100,
-        });
+        const filePath = path.join(process.cwd(), 'src', 'data', 'emails.json');
+        const data = await fs.readFile(filePath, 'utf-8');
+        const emails: any[] = JSON.parse(data);
 
-        // Define the expected shape of the response data
-        interface GmailListMessagesResponse {
-            messages?: { id: string }[];
-        }
+        const emailIds = emails
+            .filter(emailObj => {
+                const fromHeader = emailObj.payload.headers.find((header: any) => header.name === 'From');
+                return fromHeader && fromHeader.value.includes(`${email}`);
+            })
+            .map(emailObj => emailObj.id);
 
-        const data = response.data as GmailListMessagesResponse;
-        return data.messages?.map(({ id }) => id) || [];
+        return emailIds;
     } catch (err) {
         console.error('Error getting email IDs:', err);
         return [];

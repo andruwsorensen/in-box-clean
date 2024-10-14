@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "InBoxClean",
   description: "An app to clean your inbox",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.ico",
   },
 };
 

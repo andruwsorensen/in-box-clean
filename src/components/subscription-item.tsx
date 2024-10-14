@@ -11,6 +11,7 @@ interface SubscriptionItemProps {
   count: number
   domain: string
   from: string
+  date: string
   onStatsUpdate: (deletedCount: number, unsubscribedCount: number) => void
 }
 
@@ -20,6 +21,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
   count, 
   domain,
   from,
+  date,
   onStatsUpdate
 }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -75,7 +77,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ from })
+          body: JSON.stringify({ email })
         });
 
         if (!response.ok) {
@@ -145,7 +147,11 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
             <div>
               <h3 className="font-semibold">{name.split('<')[0]}</h3>
               <p className="text-sm text-gray-500">{email.includes('<') ? email.split('<')[1].split('>')[0] : email}</p>
-              <p className="text-sm text-gray-500">{count === 1 ? `${count} email` : `${count} emails`}</p>
+              <p className="text-sm text-gray-500">
+                {count === 1 ? `${count} email` : `${count} emails`}
+                &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
+                Last email {date}
+              </p>
             </div>
           </div>
           <div>
