@@ -26,7 +26,11 @@ interface EmailData {
     payload: EmailPayload;
 }
 
-interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> {}
+interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> {
+    // add some type of member here even if not used
+    // this is just to make the compiler happy so it can't be type any
+    status: number;
+}
 
 export const batchDeleteMessages = async (auth: OAuth2Client, messageIds: string[]) => {
   try {

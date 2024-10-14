@@ -6,7 +6,6 @@ import { EmailDetails } from '../types';
 const EmailList: React.FC = () => {
   const [emails, setEmails] = useState<EmailDetails[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEmails = async () => {
@@ -17,10 +16,10 @@ const EmailList: React.FC = () => {
         if (response.ok) {
           setEmails(data);
         } else {
-          setError('Failed to fetch emails');
+          console.error('Failed to fetch emails');
         }
       } catch (error) {
-        setError('An error occurred while fetching emails');
+        console.error('An error occurred while fetching emails', error);
       } finally {
         setIsLoading(false);
       }
@@ -31,11 +30,6 @@ const EmailList: React.FC = () => {
 
   if (isLoading) {
     return <div>Loading...</div>;
-  }
-
-  if (error) {
-    console.log(error);
-    return <div>{error}</div>;
   }
 
   return (
