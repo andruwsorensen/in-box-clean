@@ -32,6 +32,19 @@ interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListM
     status: number;
 }
 
+interface EmailId {
+    id: string;
+    threadId: string;
+}
+
+export interface EmailDetails {
+    // Define the structure of email details here
+    id: string;
+    threadId: string;
+    // Add other relevant fields
+}
+
+
 export const batchDeleteMessages = async (auth: OAuth2Client, messageIds: string[]) => {
   try {
     // Delete emails from Gmail
