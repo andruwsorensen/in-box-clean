@@ -16,7 +16,7 @@ export function ProfileCompletionModalComponent() {
   }
 
   return (
-    <ModalWrapper title="Complete your Profile 📝" onNext={handleNext}>
+    <ModalWrapper title="Complete your Profile 📝" onNext={handleNext} isOpen={true}>
       <CardDescription className="text-center mb-4">
         Fill it for a better experience!
       </CardDescription>
