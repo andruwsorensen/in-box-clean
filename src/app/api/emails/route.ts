@@ -16,7 +16,7 @@ export async function GET() {
         }
 
         const oAuth2Client = new google.auth.OAuth2();
-        oAuth2Client.setCredentials({access_token: session.accessToken as string });
+        oAuth2Client.setCredentials({access_token: session.access_token as string });
 
         const messages = await listMessages(oAuth2Client);
 
