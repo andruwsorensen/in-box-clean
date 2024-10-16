@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Sidebar } from './sidebar'
@@ -21,11 +23,11 @@ function LayoutContent({ children }: LayoutProps) {
   useEffect(() => {
     const checkPrerequisites = async () => {
       try {
-        const session = await auth()
-        if (!session) {
-          router.push('/');
-          return;
-        }
+        // const session = await auth()
+        // if (!session) {
+        //   router.push('/');
+        //   return;
+        // }
 
         setIsLoading(false);
       } catch (error) {
@@ -66,7 +68,7 @@ function LayoutContent({ children }: LayoutProps) {
   )
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children }: LayoutProps,) {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <LayoutContent>{children}</LayoutContent>
