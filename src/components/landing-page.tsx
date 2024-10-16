@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import logo from "../public/images/logo.png"
 import { useState } from "react"
-import { signIn } from "@/auth"
+import { signIn } from "next-auth/react"
 
 export function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);

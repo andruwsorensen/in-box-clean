@@ -12,24 +12,24 @@ declare module "next-auth" {
 }
  
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  providers: [ Google
-    // Google({
-    //   clientId : process.env.GOOGLE_CLIENT_ID,
-    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    //   authorization: {
-    //     params: {
-    //       prompt: 'consent',
-    //       access_type: 'offline',
-    //       response_type: 'code',
-    //       scope: [
-    //         'https://www.googleapis.com/auth/gmail.readonly',
-    //         'https://www.googleapis.com/auth/gmail.settings.basic',
-    //         'https://www.googleapis.com/auth/gmail.settings.sharing',
-    //         'https://www.googleapis.com/auth/gmail.modify',
-    //         'https://mail.google.com/'
-    //       ]
-    //     }
-    //   }
-    // })
+  providers: [
+    Google({
+      clientId : process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+          scope: [
+            'https://www.googleapis.com/auth/gmail.readonly',
+            'https://www.googleapis.com/auth/gmail.settings.basic',
+            'https://www.googleapis.com/auth/gmail.settings.sharing',
+            'https://www.googleapis.com/auth/gmail.modify',
+            'https://mail.google.com/'
+          ]
+        }
+      }
+    })
   ],
 })
