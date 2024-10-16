@@ -8,7 +8,6 @@ import { Header } from './header'
 import { Statistics } from './statistics'
 import { StatsProvider } from '../contexts/StatsContext'
 import WelcomeModal from './welcome-modal'
-import { auth } from '@/auth'
 
 interface LayoutProps {
   children: React.ReactNode
