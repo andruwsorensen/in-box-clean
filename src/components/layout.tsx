@@ -8,6 +8,7 @@ import { Header } from './header'
 import { Statistics } from './statistics'
 import { StatsProvider } from '../contexts/StatsContext'
 import WelcomeModal from './welcome-modal'
+import { auth } from '@/auth'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -22,8 +23,8 @@ function LayoutContent({ children }: LayoutProps) {
   useEffect(() => {
     const checkPrerequisites = async () => {
       try {
-        const response = await fetch('/api/check-prerequisites');
-        if (!response.ok) {
+        const session = await auth()
+        if (!session) {
           router.push('/');
           return;
         }

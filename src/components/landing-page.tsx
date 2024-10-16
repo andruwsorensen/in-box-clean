@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import logo from "../public/images/logo.png"
 import { useState } from "react"
+import { signIn } from "@/auth"
 
 export function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -12,16 +13,8 @@ export function LandingPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/auth');
-      const data = await response.json();
-      if (data.authUrl) {
-        window.location.href = data.authUrl;
-      } else {
-        // Throw an error if the response is not a valid URL
-        throw new Error('Invalid response from /api/auth');
-      }
-    } catch (error) {
-      console.error('Error during authentication:', error);
+      "use server"
+      await signIn("google", { callbackUrl: "/main?showModal=true" });
     } finally {
       setIsLoading(false);
     }
