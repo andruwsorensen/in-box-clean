@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 // import nodemailer from 'nodemailer';
 import { google, gmail_v1 } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
-import { getOAuth2Client } from '../utils/auth';
+import { auth } from '@/auth';
+
 
 const gmail = google.gmail('v1');
 
@@ -82,8 +83,15 @@ export async function POST(request: Request) {
   // }
 
   // 4. If all else fails, just block the email
-  const auth = await getOAuth2Client();
-  await createBlockFilter(auth, gmail, email);
+  const session = await auth();
+  if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const oAuth2Client = new google.auth.OAuth2();
+  oAuth2Client.setCredentials({access_token: session.access_token});
+  
+  await createBlockFilter(oAuth2Client, gmail, email);
   console.log('Blocking email');
   return NextResponse.json({ success: true, method: 'block' });
 }

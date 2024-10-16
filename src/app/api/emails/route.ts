@@ -1,12 +1,22 @@
-import { getOAuth2Client } from '@/app/api/utils/auth';
+// import { getOAuth2Client } from '@/app/api/utils/auth';
 import fs from 'fs/promises';
 import path from 'path';
 import { NextResponse } from 'next/server';
 import { listMessages, getEmailDetails, EmailDetails } from '@/app/api/utils/gmail';
+import { auth } from '@/auth';
+import { google } from 'googleapis';
+
+
 
 export async function GET() {
     try {
-        const oAuth2Client = await getOAuth2Client();
+        const session = await auth();
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const oAuth2Client = new google.auth.OAuth2();
+        oAuth2Client.setCredentials({access_token: session.access_token});
 
         const messages = await listMessages(oAuth2Client);
 
@@ -40,7 +50,12 @@ export async function GET() {
 
 export async function DELETE() {
     try {
-        const oAuth2Client = await getOAuth2Client();
+        const session = await auth();
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const oAuth2Client = new google.auth.OAuth2();
+        oAuth2Client.setCredentials({access_token: session.access_token});
         const emails = await listMessages(oAuth2Client);
         const validEmails = emails.filter((email): email is EmailDetails => email !== null);
 
