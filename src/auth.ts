@@ -27,7 +27,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             'https://www.googleapis.com/auth/gmail.settings.sharing',
             'https://www.googleapis.com/auth/gmail.modify',
             'https://mail.google.com/'
-          ]
+          ].join(' ')
         }
       }
     })
