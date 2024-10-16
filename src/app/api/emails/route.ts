@@ -11,7 +11,7 @@ import { google } from 'googleapis';
 export async function GET() {
     try {
         const session = await auth();
-        if (!session || !session.accessToken) {
+        if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
