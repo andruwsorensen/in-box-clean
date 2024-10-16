@@ -1,9 +1,9 @@
-import Google from "next-auth/providers/google"
+import GoogleProvider from "next-auth/providers/google"
 import NextAuth from "next-auth"
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const handler = NextAuth({
   providers: [
-    Google({
+    GoogleProvider({
       authorization: {
         params: {
           prompt: 'consent',
@@ -21,3 +21,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
 })
+
+export { handler as GET, handler as POST }
