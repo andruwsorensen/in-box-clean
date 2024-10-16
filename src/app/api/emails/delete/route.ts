@@ -1,34 +1,60 @@
-import { getOAuth2Client } from '@/app/api/utils/auth';
-import { batchDeleteMessages } from '@/app/api/utils/gmail';
-import { getEmailIds } from '@/app/api/utils/gmail';
+import { auth } from '@/auth';
+import { google, gmail_v1 } from 'googleapis';
 import { NextResponse } from 'next/server';
+import { GaxiosResponse } from 'gaxios';
+
+interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> {
+    // add some type of member here even if not used
+    // this is just to make the compiler happy so it can't be type any
+    status: number;
+}
 
 export async function POST(request: Request) {
-    const oAuth2Client = await getOAuth2Client();
-
-    const { email } = await request.json();
-    // const email = from;
-    console.log('Email to delete:', email);
-    const ids = await getEmailIds(email);
-
-    if (!ids || !Array.isArray(ids)) {
-        return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    const session = await auth();
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
+    const { email } = await request.json();
+    console.log('Email to delete:', email);
+
+    const oauth2Client = new google.auth.OAuth2();
+    oauth2Client.setCredentials({access_token: session.access_token});
+
+    const gmail = google.gmail({version: 'v1', auth: oauth2Client})
 
     try {
-        const success = await batchDeleteMessages(oAuth2Client, ids);
-        if (success) {
-            console.log(`Deleted emails with ids: ${ids.join(', ')}`);
-            return NextResponse.json({ 
-                code: 200, 
-                message: 'Emails deleted successfully',
-                deletedCount: ids.length 
-            });
-        } else {
-            return NextResponse.json({ code: 500, message: 'Failed to delete emails' });
+        const res: GmailListMessagesResponse = await gmail.users.messages.list({
+            userId: 'me',
+            q: `from:${email}`
+        })
+        
+        const ids: string[] = res.data.messages?.map(msg => msg.id ?? '') ?? [];
+
+        if (ids.length === 0) {
+            return NextResponse.json({ error: 'No emails found' }, { status: 400 });
         }
-    } catch (error) {
-        console.error('Error trashing emails:', error);
-        return NextResponse.json({ error: 'Failed to trash emails' }, { status: 500 });
+
+        try {
+            await gmail.users.messages.batchDelete({
+                userId: 'me',
+                requestBody: {
+                    ids,
+                },
+            });
+        } catch (error) {
+            console.error('Error batch deleting messages:', error);
+            return NextResponse.json({ error: 'Failed to delete emails' }, { status: 500 });
+        }
+          console.log(`Batch deleted ${ids.length} messages from Gmail.`);
+          return NextResponse.json({ 
+            code: 200, 
+            message: 'Emails deleted successfully',
+            deletedCount: ids.length 
+          })
     }
+    catch (err) {
+        console.error('Error deleting emails:', err);
+        return NextResponse.json({ error: 'Failed to delete emails' }, { status: 500 });
+    }    
 }
