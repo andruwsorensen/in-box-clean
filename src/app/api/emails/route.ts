@@ -11,12 +11,12 @@ import { google } from 'googleapis';
 export async function GET() {
     try {
         const session = await auth();
-        if (!session) {
+        if (!session || !session.accessToken) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const oAuth2Client = new google.auth.OAuth2();
-        oAuth2Client.setCredentials({access_token: session.access_token});
+        oAuth2Client.setCredentials({access_token: session.accessToken as string });
 
         const messages = await listMessages(oAuth2Client);
 
