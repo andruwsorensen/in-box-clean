@@ -34,13 +34,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
-    jwt({token, user}) {
-      if (user) {
-        token.access_token = user.access_token
-        token.refresh_token = user.refresh_token
-        token.scope = user.scope
-        token.token_type = user.token_type
-        token.expiry_date = user.expires_at ? user.expires_at * 1000 : 0
+    jwt({token, account}) {
+      if (account) {
+        token.access_token = account.access_token
+        token.refresh_token = account.refresh_token
+        token.scope = account.scope
+        token.token_type = account.token_type
+        token.expiry_date = account.expires_at ? account.expires_at * 1000 : 0
       }
       return token
     },
