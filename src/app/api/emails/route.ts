@@ -36,8 +36,8 @@ export async function GET() {
         try {
             const client = await clientPromise;
             const db = client.db('in-box-clean');
-            const emailsWithUserId = validEmails.map(email => ({ ...email, userId: session.user.email }));
-            await db.collection('emails').insertMany(emailsWithUserId);
+            const userId = session.user?.email || 'default@example.com';
+            await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, userId })));
         } catch (error) {
             console.error('Error inserting emails into MongoDB:', error);
         }
@@ -45,7 +45,7 @@ export async function GET() {
         const stats = {
             unsubscribed: 0,
             deleted: 0,
-            userId: session.user.email
+            userId: session.user?.email || 'default@example.com'
         };
 
         try {
