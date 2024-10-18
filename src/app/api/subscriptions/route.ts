@@ -47,7 +47,9 @@ export async function GET() {
 
     const client = await clientPromise;
     const db = client.db('in-box-clean');
-    const emails = await db.collection<EmailData>('emails').find({ userId: session.user.email }).toArray();
+    const emails = await db.collection<EmailData>("emails")
+      .find({ userId: session.user.email })
+      .toArray();
 
     const extractedEmails: EmailDetails[] = emails.map((email) => ({
       id: email.id,
@@ -91,15 +93,16 @@ export async function POST(request: Request) {
 
     const { from } = await request.json();
     console.log(from);
-    const email = from;
+    // const email = from;
     try {
-        const client = await clientPromise;
-        const db = client.db('in-box-clean');
-        const updatedEmails = await db.collection<EmailData>('emails').updateMany(
-            { userId: session.user.email, 'payload.headers': { $elemMatch: { name: 'From', value: { $regex: email, $options: 'i' } } } },
-            { $push: { 'payload.headers': { name: 'Subscribed', value: 'This was kept' } } }
-        );
-        console.log('Email update count: ', updatedEmails.modifiedCount);
+        // const client = await clientPromise;
+        // const db = client.db('in-box-clean');
+        // const updatedEmails = await db.collection<EmailData>('emails').updateMany(
+        //   { userId: session.user.email, 'payload.headers': { $elemMatch: { name: 'From', value: { $regex: email, $options: 'i' } } } },
+        //   { $push: { 'payload.headers': { $each: [{ name: 'Subscribed', value: 'This was kept' }] } } }
+        // );
+        // console.log(updatedEmails);
+        console.log('Email update count: ', 1);
         return NextResponse.json({ code: 200, message: 'Emails updated successfully' });
     } catch (error) {
         console.error('Error updating emails:', error);
