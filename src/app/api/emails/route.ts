@@ -36,7 +36,8 @@ export async function GET() {
         try {
             const client = await clientPromise;
             const db = client.db('in-box-clean');
-            await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, userId: session.user.email })));
+            const emailsWithUserId = validEmails.map(email => ({ ...email, userId: session.user.email }));
+            await db.collection('emails').insertMany(emailsWithUserId);
         } catch (error) {
             console.error('Error inserting emails into MongoDB:', error);
         }
