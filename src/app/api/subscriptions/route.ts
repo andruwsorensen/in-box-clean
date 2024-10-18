@@ -47,22 +47,22 @@ export async function GET() {
 
     const client = await clientPromise;
     const db = client.db('in-box-clean');
-    const emails = await db.collection<EmailData>("emails")
+    const emails = await db.collection("emails")
       .find({ userId: session.user.email })
       .toArray();
 
     const extractedEmails: EmailDetails[] = emails.map((email) => ({
       id: email.id,
       threadId: email.threadId,
-      subject: email.payload.headers.find((header) => header.name === 'Subject')?.value || 'No Subject',
+      subject: email.payload.headers.find((header: EmailHeader) => header.name === 'Subject')?.value || 'No Subject',
       snippet: email.snippet,
-      date: new Date(email.payload.headers.find((header) => header.name === 'Date')?.value || '').toLocaleString('en-US', { month: 'short', year: 'numeric' }) || '',
-      from: email.payload.headers.find((header) => header.name === 'From')?.value || 'Unknown',
-      fromName: extractName(email.payload.headers.find((header) => header.name === 'From')?.value || 'Unknown'),
-      fromEmail: extractEmail(email.payload.headers.find((header) => header.name === 'From')?.value || 'Unknown'),
-      fromDomain: extractDomain(email.payload.headers.find((header) => header.name === 'Authentication-Results')?.value || 'Unknown'),
-      isSubscription: !email.payload.headers.some((header) => header.name === 'Subscribed') && (
-        email.payload.headers.some((header) =>
+      date: new Date(email.payload.headers.find((header: EmailHeader) => header.name === 'Date')?.value || '').toLocaleString('en-US', { month: 'short', year: 'numeric' }) || '',
+      from: email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown',
+      fromName: extractName(email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown'),
+      fromEmail: extractEmail(email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown'),
+      fromDomain: extractDomain(email.payload.headers.find((header: EmailHeader) => header.name === 'Authentication-Results')?.value || 'Unknown'),
+      isSubscription: !email.payload.headers.some((header: EmailHeader) => header.name === 'Subscribed') && (
+        email.payload.headers.some((header: EmailHeader) =>
           header.name === 'List-Unsubscribe' ||
           (header.name === 'Precedence' && (header.value === 'bulk' || header.value === 'list')) ||
           header.name === 'X-Mailer' ||
