@@ -8,7 +8,6 @@ import { google } from 'googleapis';
 import clientPromise from '@/lib/mongodb';
 
 
-
 export async function GET() {
     try {
         const session = await auth();
@@ -33,11 +32,11 @@ export async function GET() {
         }));
 
         const validEmails = emails.filter((email): email is EmailDetails => email !== null);
-        
+
         try {
             const client = await clientPromise;
             const db = client.db('in-box-clean');
-            await db.collection('emails').insertMany(validEmails);
+            await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, userId: session.user.email })));
         } catch (error) {
             console.error('Error inserting emails into MongoDB:', error);
         }
@@ -50,7 +49,7 @@ export async function GET() {
         try {
             const client = await clientPromise;
             const db = client.db('in-box-clean');
-            await db.collection('stats').insertOne(stats);
+            await db.collection('stats').insertOne({ ...stats, userId: session.user.email });
         } catch (error) {
             console.error('Error inserting stats into MongoDB:', error);
         }

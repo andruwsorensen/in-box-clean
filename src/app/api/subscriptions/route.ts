@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import clientPromise from '@/lib/mongodb';
+import { auth } from '@/auth';
 
 interface EmailDetails {
   id: string;
@@ -35,13 +35,19 @@ interface EmailData {
   fromDomain: string;
   isSubscription: boolean;
   payload: EmailPayload;
+  userId: string;
 }
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), 'src', 'data', 'emails.json');
-    const data = await fs.readFile(filePath, 'utf-8');
-    const emails: EmailData[] = JSON.parse(data);
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db('in-box-clean');
+    const emails = await db.collection<EmailData>('emails').find({ userId: session.user.email }).toArray();
 
     const extractedEmails: EmailDetails[] = emails.map((email) => ({
       id: email.id,
@@ -78,27 +84,27 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { from } = await request.json();
     console.log(from);
     const email = from;
-    // Get emails.json file contents
-    const filePath = path.join(process.cwd(), 'src', 'data', 'emails.json');
-    const data = await fs.readFile(filePath, 'utf-8');
-    const emails: EmailData[] = JSON.parse(data);
-
-    // Update emails with the provided email address
-    const updatedEmails = emails.map((emailObj) => {
-      const fromHeader = emailObj.payload.headers.find((header) => header.name === 'From');
-      if (fromHeader && fromHeader.value.includes(email)) {
-        // Add the "Subscribed" header
-        emailObj.payload.headers.push({ name: 'Subscribed', value: 'This was kept' });
-      }
-      return emailObj;
-    });
-
-    // Write updated emails.json file
-    await fs.writeFile(filePath, JSON.stringify(updatedEmails, null, 2));
-    return NextResponse.json({ code: 200, message: 'Emails updated successfully' });
+    try {
+        const client = await clientPromise;
+        const db = client.db('in-box-clean');
+        const updatedEmails = await db.collection<EmailData>('emails').updateMany(
+            { userId: session.user.email, 'payload.headers': { $elemMatch: { name: 'From', value: { $regex: email, $options: 'i' } } } },
+            { $push: { 'payload.headers': { name: 'Subscribed', value: 'This was kept' } } }
+        );
+        console.log('Email update count: ', updatedEmails.modifiedCount);
+        return NextResponse.json({ code: 200, message: 'Emails updated successfully' });
+    } catch (error) {
+        console.error('Error updating emails:', error);
+        return NextResponse.json({ error: 'Failed to update emails' }, { status: 500 });
+    }
 }
 
 function extractName(value: string): string {
