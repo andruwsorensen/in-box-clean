@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { listMessages, getEmailDetails, EmailDetails } from '@/app/api/utils/gmail';
 import { auth } from '@/auth';
 import { google } from 'googleapis';
+import clientPromise from '@/lib/mongodb';
 
 
 
@@ -32,21 +33,27 @@ export async function GET() {
         }));
 
         const validEmails = emails.filter((email): email is EmailDetails => email !== null);
-
-        await fs.writeFile(
-            path.join(process.cwd(), 'src', 'data', 'emails.json'),
-            JSON.stringify(validEmails, null, 2)
-        );
+        
+        try {
+            const client = await clientPromise;
+            const db = client.db('in-box-clean');
+            await db.collection('emails').insertMany(validEmails);
+        } catch (error) {
+            console.error('Error inserting emails into MongoDB:', error);
+        }
 
         const stats = {
             unsubscribed: 0,
             deleted: 0
         };
 
-        await fs.writeFile(
-            path.join(process.cwd(), 'src', 'data', 'stats.json'),
-            JSON.stringify(stats, null, 2)
-        );
+        try {
+            const client = await clientPromise;
+            const db = client.db('in-box-clean');
+            await db.collection('stats').insertOne(stats);
+        } catch (error) {
+            console.error('Error inserting stats into MongoDB:', error);
+        }
 
         return NextResponse.json(validEmails);
     } catch (error) {
