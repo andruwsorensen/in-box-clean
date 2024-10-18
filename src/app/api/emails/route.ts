@@ -33,25 +33,29 @@ export async function GET() {
 
         const validEmails = emails.filter((email): email is EmailDetails => email !== null);
 
-        try {
-            const client = await clientPromise;
-            const db = client.db('in-box-clean');
-            await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, userId: session.user.email })));
-        } catch (error) {
-            console.error('Error inserting emails into MongoDB:', error);
-        }
+        if (session.user) {
+            try {
+                const client = await clientPromise;
+                const db = client.db('in-box-clean');
+                await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, userId: session.user.email })));
+            } catch (error) {
+                console.error('Error inserting emails into MongoDB:', error);
+            }
 
-        const stats = {
-            unsubscribed: 0,
-            deleted: 0
-        };
+            const stats = {
+                unsubscribed: 0,
+                deleted: 0
+            };
 
-        try {
-            const client = await clientPromise;
-            const db = client.db('in-box-clean');
-            await db.collection('stats').insertOne({ ...stats, userId: session.user.email });
-        } catch (error) {
-            console.error('Error inserting stats into MongoDB:', error);
+            try {
+                const client = await clientPromise;
+                const db = client.db('in-box-clean');
+                await db.collection('stats').insertOne({ ...stats, userId: session.user.email });
+            } catch (error) {
+                console.error('Error inserting stats into MongoDB:', error);
+            }
+        } else {
+            console.error('session.user is not defined');
         }
 
         return NextResponse.json(validEmails);
