@@ -15,14 +15,15 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        if (!session.access_token) {
-            return NextResponse.json({ error: 'Access token not found' }, { status: 401 });
+        if (!session.access_token || !session.scope) {
+            return NextResponse.json({ error: 'Access token or scope not found' }, { status: 401 });
         }
 
-        console.log(session.access_token);
-
         const oAuth2Client = new google.auth.OAuth2();
-        oAuth2Client.setCredentials({access_token: session.access_token as string });
+        oAuth2Client.setCredentials({
+            access_token: session.access_token as string,
+            scope: session.scope as string,
+        });
 
         const messages = await listMessages(oAuth2Client);
 
