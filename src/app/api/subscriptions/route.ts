@@ -24,19 +24,19 @@ interface EmailPayload {
   headers: EmailHeader[];
 }
 
-interface EmailData {
-  id: string;
-  threadId: string;
-  subject: string;
-  snippet: string;
-  date: string;
-  fromName: string;
-  fromEmail: string;
-  fromDomain: string;
-  isSubscription: boolean;
-  payload: EmailPayload;
-  userId: string;
-}
+// interface EmailData {
+//   id: string;
+//   threadId: string;
+//   subject: string;
+//   snippet: string;
+//   date: string;
+//   fromName: string;
+//   fromEmail: string;
+//   fromDomain: string;
+//   isSubscription: boolean;
+//   payload: EmailPayload;
+//   userId: string;
+// }
 
 export async function GET() {
   try {
