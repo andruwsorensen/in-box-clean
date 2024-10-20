@@ -20,9 +20,9 @@ interface EmailHeader {
   value: string;
 }
 
-interface EmailPayload {
-  headers: EmailHeader[];
-}
+// interface EmailPayload {
+//   headers: EmailHeader[];
+// }
 
 // interface EmailData {
 //   id: string;
