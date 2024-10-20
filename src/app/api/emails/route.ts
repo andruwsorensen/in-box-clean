@@ -36,6 +36,8 @@ export async function GET() {
         try {
             const client = await clientPromise;
             const db = client.db('in-box-clean');
+            // TODO figure out what the session looks like to get the default email
+            console.log(session);
             const userId = session.user?.email || 'default@example.com';
             await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, userId })));
         } catch (error) {
