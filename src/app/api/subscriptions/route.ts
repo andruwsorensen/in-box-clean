@@ -48,7 +48,7 @@ export async function GET() {
     const client = await clientPromise;
     const db = client.db('in-box-clean');
     const emails = await db.collection("emails")
-      .find({ userId: session.user.email })
+      .find({ userId: session.user.email || '' })
       .toArray();
 
     const extractedEmails: EmailDetails[] = emails.map((email) => ({
