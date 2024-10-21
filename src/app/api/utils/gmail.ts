@@ -1,8 +1,7 @@
 import { OAuth2Client } from 'google-auth-library';
 import { GaxiosResponse } from 'gaxios';
 import { google, gmail_v1 } from 'googleapis';
-import fs from 'fs/promises';
-import path from 'path';
+import clientPromise from '@/lib/mongodb';
 
 const gmail = google.gmail('v1');
 
@@ -24,11 +23,11 @@ interface EmailData {
     id: string;
     threadId: string;
     payload: EmailPayload;
+    sessionId: string;
+    expires: number;
 }
 
 interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> {
-    // add some type of member here even if not used
-    // this is just to make the compiler happy so it can't be type any
     status: number;
 }
 
@@ -38,12 +37,10 @@ interface EmailId {
 }
 
 export interface EmailDetails {
-    // Define the structure of email details here
     id: string;
     threadId: string;
     // Add other relevant fields
 }
-
 
 export const batchDeleteMessages = async (auth: OAuth2Client, messageIds: string[]) => {
   try {
@@ -57,13 +54,13 @@ export const batchDeleteMessages = async (auth: OAuth2Client, messageIds: string
     });
     console.log(`Batch deleted ${messageIds.length} messages from Gmail.`);
 
-    // Delete emails from emails.json file
-    const filePath = path.join(process.cwd(), 'src', 'data', 'emails.json');
-    const data = await fs.readFile(filePath, 'utf-8');
-    const emails: EmailData[] = JSON.parse(data);
-    const updatedEmails = emails.filter(email => !messageIds.includes(email.id));
-    await fs.writeFile(filePath, JSON.stringify(updatedEmails, null, 2));
-    console.log(`Deleted ${messageIds.length} emails from emails.json file.`);
+    // Delete emails from the database
+    const client = await clientPromise;
+    const db = client.db('in-box-clean');
+    const result = await db.collection<EmailData>('emails').deleteMany({
+      id: { $in: messageIds },
+    });
+    console.log(`Deleted ${result.deletedCount} emails from the database.`);
 
     return true;
   } catch (err) {
@@ -107,25 +104,5 @@ export const getEmailDetails = async (auth: OAuth2Client, messageId: string): Pr
     } catch (err) {
         console.error('Error getting email details:', err);
         return null;
-    }
-};
-
-export const getEmailIds = async (email: string): Promise<string[]> => {
-    try {
-        const filePath = path.join(process.cwd(), 'src', 'data', 'emails.json');
-        const data = await fs.readFile(filePath, 'utf-8');
-        const emails: EmailData[] = JSON.parse(data);
-
-        const emailIds = emails
-            .filter(emailObj => {
-                const fromHeader = emailObj.payload.headers.find(header => header.name === 'From');
-                return fromHeader && fromHeader.value.includes(email);
-            })
-            .map(emailObj => emailObj.id);
-
-        return emailIds;
-    } catch (err) {
-        console.error('Error getting email IDs:', err);
-        return [];
     }
 };

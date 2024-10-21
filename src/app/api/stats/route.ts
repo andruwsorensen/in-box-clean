@@ -1,16 +1,29 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import clientPromise from '@/lib/mongodb';
+import { auth } from '@/auth';
 
 export interface Stats {
     unsubscribed: number;
     deleted: number;
+    expires: number;
+    sessionId: string;
 }
 
 export async function GET() {
     try {
-        const statsFilePath = path.join(process.cwd(), 'src', 'data', 'stats.json');
-        const stats: Stats = JSON.parse(await fs.readFile(statsFilePath, 'utf-8'));
+        const session = await auth();
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const client = await clientPromise;
+        const db = client.db('in-box-clean');
+        const stats = await db.collection<Stats>('stats').findOne({ sessionId: session.access_token });
+
+        if (!stats) {
+            return NextResponse.json({ error: 'Stats not found' }, { status: 404 });
+        }
+
         return NextResponse.json(stats);
     } catch (error) {
         console.error('Error fetching stats:', error);
@@ -20,21 +33,31 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        const statsFilePath = path.join(process.cwd(), 'src', 'data', 'stats.json');
-        const stats: Stats = JSON.parse(await fs.readFile(statsFilePath, 'utf-8'));
+        const session = await auth();
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const client = await clientPromise;
+        const db = client.db('in-box-clean');
 
         const { deleted, unsubscribed } = await request.json();
         console.log('Updating stats:', { deleted, unsubscribed });
 
-        if (typeof deleted === 'number') {
-            stats.deleted += deleted;
-        }
-        if (typeof unsubscribed === 'number') {
-            stats.unsubscribed += unsubscribed;
-        }
+        const existingStats = await db.collection<Stats>('stats').findOne({ sessionId: session.access_token });
 
-        await fs.writeFile(statsFilePath, JSON.stringify(stats, null, 2));
-        console.log('Updated stats:', stats);
+        const updateQuery: Partial<Stats> = {
+            deleted: (existingStats?.deleted || 0) + (deleted || 0),
+            unsubscribed: (existingStats?.unsubscribed || 0) + (unsubscribed || 0),
+        };
+
+        const result = await db.collection<Stats>('stats').updateOne(
+            { sessionId: session.access_token },
+            { $set: updateQuery },
+            { upsert: true }
+        );
+
+        console.log('Updated stats:', result);
         return NextResponse.json({ code: 200, message: 'Stats updated successfully' });
     } catch (error) {
         console.error('Error updating stats:', error);

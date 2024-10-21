@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { auth } from '@/auth';
 
+// Fix stats.json
+// Fix deletes
+// Fix unsubscribes and keep
+// Make sure no calls to json is made
+// Use a different id for the user, email for some reason is not there, maybe token? Don't know...
+
 interface EmailDetails {
   id: string;
   threadId: string;
@@ -48,7 +54,7 @@ export async function GET() {
     const client = await clientPromise;
     const db = client.db('in-box-clean');
     const emails = await db.collection("emails")
-      .find({ userId: session?.user?.email || 'default@example.com' })
+      .find({ sessionId: session.access_token })
       .toArray();
 
     const extractedEmails: EmailDetails[] = emails.map((email) => ({

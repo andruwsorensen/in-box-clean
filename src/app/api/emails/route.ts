@@ -11,7 +11,7 @@ import clientPromise from '@/lib/mongodb';
 export async function GET() {
     try {
         const session = await auth();
-        if (!session || !session.user) {
+        if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -36,10 +36,10 @@ export async function GET() {
         try {
             const client = await clientPromise;
             const db = client.db('in-box-clean');
-            // TODO figure out what the session looks like to get the default email
-            console.log(session);
-            const userId = session.user?.email || 'default@example.com';
-            await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, userId })));
+            console.log('Session: ', session);
+            const sessionId = session.access_token;
+            const expires = session.expires;
+            await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, sessionId, expires })));
         } catch (error) {
             console.error('Error inserting emails into MongoDB:', error);
         }
@@ -47,7 +47,8 @@ export async function GET() {
         const stats = {
             unsubscribed: 0,
             deleted: 0,
-            userId: session.user?.email || 'default@example.com'
+            expires: session.expires,
+            sessionId: session.access_token
         };
 
         try {
