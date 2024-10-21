@@ -1,30 +1,12 @@
 import { OAuth2Client } from 'google-auth-library';
 import { GaxiosResponse } from 'gaxios';
 import { google, gmail_v1 } from 'googleapis';
-import clientPromise from '@/lib/mongodb';
 
 const gmail = google.gmail('v1');
 
 interface EmailId {
     id: string;
     threadId: string;
-}
-
-interface EmailHeader {
-    name: string;
-    value: string;
-}
-
-interface EmailPayload {
-    headers: EmailHeader[];
-}
-
-interface EmailData {
-    id: string;
-    threadId: string;
-    payload: EmailPayload;
-    sessionId: string;
-    expires: number;
 }
 
 interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> {
@@ -53,7 +35,7 @@ export const batchDeleteMessages = async (auth: OAuth2Client, messageIds: string
       auth,
     });
     console.log(`Batch deleted ${messageIds.length} messages from Gmail.`);
-    
+
     return true;
   } catch (err) {
     console.error('Error batch deleting messages:', err);
