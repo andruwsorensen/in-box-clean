@@ -53,15 +53,7 @@ export const batchDeleteMessages = async (auth: OAuth2Client, messageIds: string
       auth,
     });
     console.log(`Batch deleted ${messageIds.length} messages from Gmail.`);
-
-    // Delete emails from the database
-    const client = await clientPromise;
-    const db = client.db('in-box-clean');
-    const result = await db.collection<EmailData>('emails').deleteMany({
-      id: { $in: messageIds },
-    });
-    console.log(`Deleted ${result.deletedCount} emails from the database.`);
-
+    
     return true;
   } catch (err) {
     console.error('Error batch deleting messages:', err);

@@ -1,12 +1,8 @@
-// import { getOAuth2Client } from '@/app/api/utils/auth';
-import fs from 'fs/promises';
-import path from 'path';
 import { NextResponse } from 'next/server';
 import { listMessages, getEmailDetails, EmailDetails } from '@/app/api/utils/gmail';
 import { auth } from '@/auth';
 import { google } from 'googleapis';
 import clientPromise from '@/lib/mongodb';
-
 
 export async function GET() {
     try {
@@ -36,12 +32,22 @@ export async function GET() {
         try {
             const client = await clientPromise;
             const db = client.db('in-box-clean');
-            console.log('Session: ', session);
             const sessionId = session.access_token;
             const expires = session.expires;
-            await db.collection('emails').insertMany(validEmails.map(email => ({ ...email, sessionId, expires })));
+
+            const existingEmailIds = await db.collection('emails').distinct('id');
+
+            const emailsToInsert = validEmails.filter(email => !existingEmailIds.includes(email.id));
+            const emailsToUpdate = validEmails.filter(email => existingEmailIds.includes(email.id));
+
+            await db.collection('emails').insertMany(emailsToInsert.map(email => ({ ...email, sessionId, expires })));
+
+            await db.collection('emails').updateMany(
+                { id: { $in: emailsToUpdate.map(email => email.id) } },
+                { $set: { sessionId, expires } }
+            );
         } catch (error) {
-            console.error('Error inserting emails into MongoDB:', error);
+            console.error('Error inserting/updating emails into MongoDB:', error);
         }
 
         const stats = {
@@ -75,11 +81,6 @@ export async function DELETE() {
         oAuth2Client.setCredentials({access_token: session.access_token});
         const emails = await listMessages(oAuth2Client);
         const validEmails = emails.filter((email): email is EmailDetails => email !== null);
-
-        await fs.writeFile(
-            path.join(process.cwd(), 'src', 'data', 'emails.json'),
-            JSON.stringify(validEmails, null, 2)
-        );
 
         return NextResponse.json(validEmails);
     } catch (error) {

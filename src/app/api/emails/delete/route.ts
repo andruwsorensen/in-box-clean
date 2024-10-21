@@ -2,10 +2,9 @@ import { auth } from '@/auth';
 import { google, gmail_v1 } from 'googleapis';
 import { NextResponse } from 'next/server';
 import { GaxiosResponse } from 'gaxios';
+import clientPromise from '@/lib/mongodb';
 
 interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> {
-    // add some type of member here even if not used
-    // this is just to make the compiler happy so it can't be type any
     status: number;
 }
 
@@ -46,12 +45,18 @@ export async function POST(request: Request) {
             console.error('Error batch deleting messages:', error);
             return NextResponse.json({ error: 'Failed to delete emails' }, { status: 500 });
         }
-          console.log(`Batch deleted ${ids.length} messages from Gmail.`);
-          return NextResponse.json({ 
+
+        // Delete emails from the database using the ids
+        const client = await clientPromise;
+        const db = client.db('in-box-clean');
+        const deletedCount = await db.collection('emails').deleteMany({ id: { $in: ids } });
+
+        console.log(`Batch deleted ${ids.length} messages from Gmail and ${deletedCount.deletedCount} emails from the database.`);
+        return NextResponse.json({ 
             code: 200, 
             message: 'Emails deleted successfully',
             deletedCount: ids.length 
-          })
+        })
     }
     catch (err) {
         console.error('Error deleting emails:', err);
