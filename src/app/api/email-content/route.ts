@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import clientPromise from '@/lib/mongodb';
 
 interface EmailHeader {
   name: string;
@@ -14,32 +13,26 @@ interface EmailPayload {
   };
 }
 
-interface Email {
+interface EmailData {
   payload: EmailPayload;
 }
 
 export async function POST(request: Request) {
   try {
     const { from } = await request.json() as { from: string };
-    
-    const filePath = path.join(process.cwd(), 'src', 'data', 'emails.json');
-    const data = await fs.readFile(filePath, 'utf-8');
-    const emails: Email[] = JSON.parse(data);
 
-    const email = emails.find((email) => {
-      // print to console the first email header
-      const fromHeader = email.payload.headers.find((header) => header.name === 'From');
-      return fromHeader && fromHeader.value.includes(from);
-    });
+    const client = await clientPromise;
+    const db = client.db('in-box-clean');
+    const emailData = await db.collection<EmailData>('emails').findOne({ 'payload.headers': { $elemMatch: { name: 'From', value: { $regex: new RegExp(from, 'i') } } } });
 
-    if (!email) {
+    if (!emailData) {
       return NextResponse.json({ error: 'Email not found' }, { status: 404 });
     }
 
     // Construct email content
-    const headers = email.payload.headers.map((header) => `${header.name}: ${header.value}`).join('\n');
-    const body = email.payload.body.data 
-      ? Buffer.from(email.payload.body.data, 'base64').toString('utf-8')
+    const headers = emailData.payload.headers.map((header) => `${header.name}: ${header.value}`).join('\n');
+    const body = emailData.payload.body.data
+      ? Buffer.from(emailData.payload.body.data, 'base64').toString('utf-8')
       : 'No body content';
 
     const fullEmailContent = `${headers}\n\n${body}`;
