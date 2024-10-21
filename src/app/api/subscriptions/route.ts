@@ -2,12 +2,6 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { auth } from '@/auth';
 
-// Fix stats.json
-// Fix deletes
-// Fix unsubscribes and keep
-// Make sure no calls to json is made
-// Use a different id for the user, email for some reason is not there, maybe token? Don't know...
-
 interface EmailDetails {
   id: string;
   threadId: string;
@@ -26,23 +20,23 @@ interface EmailHeader {
   value: string;
 }
 
-// interface EmailPayload {
-//   headers: EmailHeader[];
-// }
+interface EmailPayload {
+  headers: EmailHeader[];
+}
 
-// interface EmailData {
-//   id: string;
-//   threadId: string;
-//   subject: string;
-//   snippet: string;
-//   date: string;
-//   fromName: string;
-//   fromEmail: string;
-//   fromDomain: string;
-//   isSubscription: boolean;
-//   payload: EmailPayload;
-//   userId: string;
-// }
+interface EmailData {
+  id: string;
+  threadId: string;
+  subject: string;
+  snippet: string;
+  date: string;
+  fromName: string;
+  fromEmail: string;
+  fromDomain: string;
+  isSubscription: boolean;
+  payload: EmailPayload;
+  userId: string;
+}
 
 export async function GET() {
   try {
@@ -99,15 +93,15 @@ export async function POST(request: Request) {
 
     const { from } = await request.json();
     console.log(from);
-    // const email = from;
+    const email = from;
     try {
-        // const client = await clientPromise;
-        // const db = client.db('in-box-clean');
-        // const updatedEmails = await db.collection<EmailData>('emails').updateMany(
-        //   { userId: session.user.email, 'payload.headers': { $elemMatch: { name: 'From', value: { $regex: email, $options: 'i' } } } },
-        //   { $push: { 'payload.headers': { $each: [{ name: 'Subscribed', value: 'This was kept' }] } } }
-        // );
-        // console.log(updatedEmails);
+        const client = await clientPromise;
+        const db = client.db('in-box-clean');
+        const updatedEmails = await db.collection<EmailData>('emails').updateMany(
+          { sessionId: session.access_token, 'payload.headers': { $elemMatch: { name: 'From', value: { $regex: email, $options: 'i' } } } },
+          { $push: { 'payload.headers': { $each: [{ name: 'Subscribed', value: 'This was kept' }] } } }
+        );
+        console.log(updatedEmails);
         console.log('Email update count: ', 1);
         return NextResponse.json({ code: 200, message: 'Emails updated successfully' });
     } catch (error) {
