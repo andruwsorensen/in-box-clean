@@ -10,8 +10,10 @@ interface DatabaseOperationResult {
 
 export async function POST(request: Request) {
     try {
+        console.log('Saving emails to the database...');
         const session = await auth();
         if (!session?.access_token) {
+            console.log('Unauthorized access');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -20,6 +22,7 @@ export async function POST(request: Request) {
         console.log('Emails to save:', emails);
 
         if (emails.length === 0) {
+            console.log('Email array is empty');
             throw new Error('Email array is empty');
         }
 
@@ -28,15 +31,18 @@ export async function POST(request: Request) {
         const sessionId = session.access_token;
         const expires = session.expires;
 
+        console.log('Checking for existing email IDs...');
         const existingEmailIds = await db.collection('emails').distinct('id');
 
         const emailsToInsert = emails.filter(email => !existingEmailIds.includes(email.id));
         const emailsToUpdate = emails.filter(email => existingEmailIds.includes(email.id));
 
+        console.log(`Inserting ${emailsToInsert.length} new emails...`);
         const insertResult = await db.collection('emails').insertMany(
             emailsToInsert.map(email => ({ ...email, sessionId, expires }))
         );
 
+        console.log(`Updating ${emailsToUpdate.length} existing emails...`);
         const updateResult = await db.collection('emails').updateMany(
             { id: { $in: emailsToUpdate.map(email => email.id) } },
             { $set: { sessionId, expires } }
@@ -49,6 +55,7 @@ export async function POST(request: Request) {
             sessionId: session.access_token
         };
 
+        console.log('Inserting stats...');
         await db.collection('stats').insertOne({ ...stats });
 
         const result: DatabaseOperationResult = {
@@ -56,6 +63,7 @@ export async function POST(request: Request) {
             updated: updateResult.modifiedCount
         };
 
+        console.log('Database operations completed successfully:', result);
         return NextResponse.json(result);
     } catch (error) {
         console.error('Error processing database operations:', error);
