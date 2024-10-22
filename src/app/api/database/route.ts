@@ -17,6 +17,12 @@ export async function POST(request: Request) {
 
         const emails: EmailDetails[] = await request.json();
 
+        console.log('Emails to save:', emails);
+
+        if (emails.length === 0) {
+            throw new Error('Email array is empty');
+        }
+
         const client = await clientPromise;
         const db = client.db('in-box-clean');
         const sessionId = session.access_token;

@@ -22,17 +22,20 @@ export default function WelcomeModal() {
 
   const handleNext = async () => {
     try {
+      console.log('Fetching list of emails...');
       // Fetch the list of emails
       const listResponse = await fetch('/api/emails/list');
       if (!listResponse.ok) {
         throw new Error('Failed to fetch emails');
       }
       const emails: EmailListItem[] = await listResponse.json();
+      console.log(`Fetched ${emails.length} emails`);
 
       // Fetch the email details in batches of 100
       const emailDetails: EmailListItem[] = [];
       for (let i = 0; i < emails.length; i += 100) {
         const batch = emails.slice(i, i + 100);
+        console.log(`Fetching details for batch ${i / 100 + 1} of ${Math.ceil(emails.length / 100)}`);
         const detailsResponse = await fetch('/api/emails/details', {
           method: 'POST',
           headers: {
@@ -45,11 +48,13 @@ export default function WelcomeModal() {
         }
         const batchDetails: EmailListItem[] = await detailsResponse.json();
         emailDetails.push(...batchDetails);
+        console.log(`Fetched ${batchDetails.length} email details for batch ${i / 100 + 1}`);
       }
 
-      console.log('Emails fetched:', emailDetails);
+      console.log(`Total ${emailDetails.length} email details fetched`);
 
       // Save the emails to the database
+      console.log('Saving emails to database...');
       const dbResponse = await fetch('/api/emails/db', {
         method: 'POST',
         headers: {
@@ -65,6 +70,7 @@ export default function WelcomeModal() {
       console.log('Emails saved to database:', dbResult);
 
       // Navigate to the main page
+      console.log('Navigating to main page...');
       router.replace('/main');
       router.refresh();
       setIsOpen(false);
