@@ -51,7 +51,7 @@ export const listMessages = async (auth: OAuth2Client): Promise<EmailId[]> => {
         const response: GmailListMessagesResponse = await gmail.users.messages.list({
             userId: 'me',
             auth,
-            maxResults: 100,
+            maxResults: 500,
             pageToken,
         });
   
