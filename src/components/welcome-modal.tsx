@@ -5,22 +5,53 @@ import { CardDescription } from "@/components/ui/card"
 import { useRouter } from 'next/navigation';
 import { useState } from "react"
 
+interface EmailListItem {
+  id: string;
+  threadId: string;
+  snippet: string;
+}
+
+interface DatabaseOperationResult {
+  inserted: number;
+  updated: number;
+}
+
 export default function WelcomeModal() {
     const [isOpen, setIsOpen] = useState(true);
     const router = useRouter();
 
   const handleNext = async () => {
     try {
-      const response = await fetch('/api/emails');
-      if (!response.ok) {
+      // Fetch the list of emails
+      const listResponse = await fetch('/api/emails/list');
+      if (!listResponse.ok) {
         throw new Error('Failed to fetch emails');
       }
+      const emails: EmailListItem[] = await listResponse.json();
+
+      // Save the emails to the database
+      const dbResponse = await fetch('/api/emails/db', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emails),
+      });
+      if (!dbResponse.ok) {
+        throw new Error('Failed to save emails to database');
+      }
+      const dbResult: DatabaseOperationResult = await dbResponse.json();
+
+      console.log('Emails saved to database:', dbResult);
+
+      // Navigate to the main page
       router.replace('/main');
       router.refresh();
       setIsOpen(false);
-   } catch (error) {
-    console.log('Error fetching emails:', error);
-   }
+    } catch (error) {
+      console.error('Error processing emails:', error);
+      // Here you might want to show an error message to the user
+    }
   }
 
   return (
