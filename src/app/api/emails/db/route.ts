@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
         const emails: EmailDetails[] = await request.json();
 
-        console.log('Emails to save:', emails);
+        console.log('Received emails:', emails);
 
         if (emails.length === 0) {
             console.log('Email array is empty');
@@ -33,20 +33,26 @@ export async function POST(request: Request) {
 
         console.log('Checking for existing email IDs...');
         const existingEmailIds = await db.collection('emails').distinct('id');
+        console.log('Existing email IDs:', existingEmailIds);
 
         const emailsToInsert = emails.filter(email => !existingEmailIds.includes(email.id));
+        console.log('Emails to insert:', emailsToInsert);
+
         const emailsToUpdate = emails.filter(email => existingEmailIds.includes(email.id));
+        console.log('Emails to update:', emailsToUpdate);
 
         console.log(`Inserting ${emailsToInsert.length} new emails...`);
         const insertResult = await db.collection('emails').insertMany(
             emailsToInsert.map(email => ({ ...email, sessionId, expires }))
         );
+        console.log('Inserted emails:', insertResult.insertedIds);
 
         console.log(`Updating ${emailsToUpdate.length} existing emails...`);
         const updateResult = await db.collection('emails').updateMany(
             { id: { $in: emailsToUpdate.map(email => email.id) } },
             { $set: { sessionId, expires } }
         );
+        console.log('Updated emails:', updateResult.modifiedCount);
 
         const stats = {
             unsubscribed: 0,
