@@ -32,9 +32,10 @@ export default function WelcomeModal() {
       console.log(`Fetched ${emails.length} emails`);
 
       // Fetch the email details and save to the database in batches of 100
-      for (let i = 0; i < emails.length; i += 100) {
-        const batch = emails.slice(i, i + 100);
-        console.log(`Processing batch ${i / 100 + 1} of ${Math.ceil(emails.length / 100)}`);
+      const batchSize = 100;
+      for (let i = 0; i < emails.length; i += batchSize) {
+        const batch = emails.slice(i, i + batchSize);
+        console.log(`Processing batch ${i / batchSize + 1} of ${Math.ceil(emails.length / batchSize)}`);
         const detailsResponse = await fetch('/api/emails/details', {
           method: 'POST',
           headers: {
@@ -46,22 +47,26 @@ export default function WelcomeModal() {
           throw new Error('Failed to fetch email details');
         }
         const batchDetails: EmailListItem[] = await detailsResponse.json();
-        console.log(`Fetched ${batchDetails.length} email details for batch ${i / 100 + 1}`);
+        console.log(`Fetched ${batchDetails.length} email details for batch ${i / batchSize + 1}`);
 
-        // Save the batch to the database
-        console.log('Saving batch to database...');
-        const dbResponse = await fetch('/api/emails/db', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(batchDetails),
-        });
-        if (!dbResponse.ok) {
-          throw new Error('Failed to save emails to database');
+        // Save the batch to the database in smaller chunks
+        const chunkSize = 10;
+        for (let j = 0; j < batchDetails.length; j += chunkSize) {
+          const chunk = batchDetails.slice(j, j + chunkSize);
+          console.log(`Saving chunk ${j / chunkSize + 1} of ${Math.ceil(batchDetails.length / chunkSize)} for batch ${i / batchSize + 1}`);
+          const dbResponse = await fetch('/api/emails/db', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(chunk),
+          });
+          if (!dbResponse.ok) {
+            throw new Error('Failed to save emails to database');
+          }
+          const dbResult: DatabaseOperationResult = await dbResponse.json();
+          console.log('Chunk saved to database:', dbResult);
         }
-        const dbResult: DatabaseOperationResult = await dbResponse.json();
-        console.log('Batch saved to database:', dbResult);
       }
 
       console.log('Emails processed successfully');
