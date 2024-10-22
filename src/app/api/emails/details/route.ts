@@ -3,18 +3,17 @@ import { getEmailDetails } from '@/app/api/utils/gmail';
 import { auth } from '@/auth';
 import { google } from 'googleapis';
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
     try {
         const session = await auth();
         if (!session?.access_token || !session?.scope) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { searchParams } = new URL(request.url);
-        const messageId = searchParams.get('id');
+        const emailIds: { id: string }[] = await request.json();
 
-        if (!messageId) {
-            return NextResponse.json({ error: 'Message ID is required' }, { status: 400 });
+        if (!emailIds || emailIds.length === 0) {
+            return NextResponse.json({ error: 'Email IDs are required' }, { status: 400 });
         }
 
         const oAuth2Client = new google.auth.OAuth2();
@@ -23,12 +22,9 @@ export async function GET(request: Request) {
             scope: session.scope,
         });
 
-        const emailDetails = await getEmailDetails(oAuth2Client, messageId);
-        if (!emailDetails) {
-            return NextResponse.json({ error: 'Email not found' }, { status: 404 });
-        }
+        const emailDetails = await Promise.all(emailIds.map(({ id }) => getEmailDetails(oAuth2Client, id)));
 
-        return NextResponse.json(emailDetails);
+        return NextResponse.json(emailDetails.filter(Boolean));
     } catch (error) {
         console.error('Error getting email details:', error);
         return NextResponse.json({ error: 'Failed to get email details' }, { status: 500 });

@@ -29,6 +29,21 @@ export default function WelcomeModal() {
       }
       const emails: EmailListItem[] = await listResponse.json();
 
+      // Fetch the email details with post
+      const detailsResponse = await fetch('/api/emails/details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(emails),
+      });
+      if (!detailsResponse.ok) {
+        throw new Error('Failed to fetch email details');
+      }
+      const emailDetails: EmailListItem[] = await detailsResponse.json();
+
+      console.log('Emails fetched:', emailDetails);
+
       // Save the emails to the database
       const dbResponse = await fetch('/api/emails/db', {
         method: 'POST',
