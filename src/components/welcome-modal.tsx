@@ -50,7 +50,7 @@ export default function WelcomeModal() {
         console.log(`Fetched ${batchDetails.length} email details for batch ${i / batchSize + 1}`);
 
         // Save the batch to the database in smaller chunks
-        const chunkSize = 25;
+        const chunkSize = 20;
         for (let j = 0; j < batchDetails.length; j += chunkSize) {
           const chunk = batchDetails.slice(j, j + chunkSize);
           console.log(`Saving chunk ${j / chunkSize + 1} of ${Math.ceil(batchDetails.length / chunkSize)} for batch ${i / batchSize + 1}`);
