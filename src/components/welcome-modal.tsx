@@ -29,18 +29,23 @@ export default function WelcomeModal() {
       }
       const emails: EmailListItem[] = await listResponse.json();
 
-      // Fetch the email details with post
-      const detailsResponse = await fetch('/api/emails/details', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emails),
-      });
-      if (!detailsResponse.ok) {
-        throw new Error('Failed to fetch email details');
+      // Fetch the email details in batches of 100
+      const emailDetails: EmailListItem[] = [];
+      for (let i = 0; i < emails.length; i += 100) {
+        const batch = emails.slice(i, i + 100);
+        const detailsResponse = await fetch('/api/emails/details', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(batch),
+        });
+        if (!detailsResponse.ok) {
+          throw new Error('Failed to fetch email details');
+        }
+        const batchDetails: EmailListItem[] = await detailsResponse.json();
+        emailDetails.push(...batchDetails);
       }
-      const emailDetails: EmailListItem[] = await detailsResponse.json();
 
       console.log('Emails fetched:', emailDetails);
 
@@ -50,7 +55,7 @@ export default function WelcomeModal() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(emails),
+        body: JSON.stringify(emailDetails),
       });
       if (!dbResponse.ok) {
         throw new Error('Failed to save emails to database');
