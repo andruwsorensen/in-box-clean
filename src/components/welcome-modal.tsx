@@ -31,11 +31,10 @@ export default function WelcomeModal() {
       const emails: EmailListItem[] = await listResponse.json();
       console.log(`Fetched ${emails.length} emails`);
 
-      // Fetch the email details in batches of 100
-      const emailDetails: EmailListItem[] = [];
+      // Fetch the email details and save to the database in batches of 100
       for (let i = 0; i < emails.length; i += 100) {
         const batch = emails.slice(i, i + 100);
-        console.log(`Fetching details for batch ${i / 100 + 1} of ${Math.ceil(emails.length / 100)}`);
+        console.log(`Processing batch ${i / 100 + 1} of ${Math.ceil(emails.length / 100)}`);
         const detailsResponse = await fetch('/api/emails/details', {
           method: 'POST',
           headers: {
@@ -47,27 +46,25 @@ export default function WelcomeModal() {
           throw new Error('Failed to fetch email details');
         }
         const batchDetails: EmailListItem[] = await detailsResponse.json();
-        emailDetails.push(...batchDetails);
         console.log(`Fetched ${batchDetails.length} email details for batch ${i / 100 + 1}`);
+
+        // Save the batch to the database
+        console.log('Saving batch to database...');
+        const dbResponse = await fetch('/api/emails/db', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(batchDetails),
+        });
+        if (!dbResponse.ok) {
+          throw new Error('Failed to save emails to database');
+        }
+        const dbResult: DatabaseOperationResult = await dbResponse.json();
+        console.log('Batch saved to database:', dbResult);
       }
 
-      console.log(`Total ${emailDetails.length} email details fetched`);
-
-      // Save the emails to the database
-      console.log('Saving emails to database...');
-      const dbResponse = await fetch('/api/emails/db', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(emailDetails),
-      });
-      if (!dbResponse.ok) {
-        throw new Error('Failed to save emails to database');
-      }
-      const dbResult: DatabaseOperationResult = await dbResponse.json();
-
-      console.log('Emails saved to database:', dbResult);
+      console.log('Emails processed successfully');
 
       // Navigate to the main page
       console.log('Navigating to main page...');
