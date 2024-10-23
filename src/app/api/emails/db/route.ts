@@ -47,7 +47,6 @@ export async function POST(request: Request) {
             insertResult = await db.collection('emails').insertMany(
                 emailsToInsert.map(email => ({ ...email, sessionId, expires }))
             );
-            console.log('Inserted emails:', insertResult.insertedIds);
         }
 
         let updateResult = { modifiedCount: 0 };
