@@ -41,18 +41,24 @@ export async function POST(request: Request) {
         const emailsToUpdate = emails.filter(email => existingEmailIds.includes(email.id));
         console.log('Emails to update:', emailsToUpdate);
 
-        console.log(`Inserting ${emailsToInsert.length} new emails...`);
-        const insertResult = await db.collection('emails').insertMany(
-            emailsToInsert.map(email => ({ ...email, sessionId, expires }))
-        );
-        console.log('Inserted emails:', insertResult.insertedIds);
+        let insertResult = { insertedCount: 0 };
+        if (emailsToInsert.length > 0) {
+            console.log(`Inserting ${emailsToInsert.length} new emails...`);
+            insertResult = await db.collection('emails').insertMany(
+                emailsToInsert.map(email => ({ ...email, sessionId, expires }))
+            );
+            console.log('Inserted emails:', insertResult.insertedIds);
+        }
 
-        console.log(`Updating ${emailsToUpdate.length} existing emails...`);
-        const updateResult = await db.collection('emails').updateMany(
-            { id: { $in: emailsToUpdate.map(email => email.id) } },
-            { $set: { sessionId, expires } }
-        );
-        console.log('Updated emails:', updateResult.modifiedCount);
+        let updateResult = { modifiedCount: 0 };
+        if (emailsToUpdate.length > 0) {
+            console.log(`Updating ${emailsToUpdate.length} existing emails...`);
+            updateResult = await db.collection('emails').updateMany(
+                { id: { $in: emailsToUpdate.map(email => email.id) } },
+                { $set: { sessionId, expires } }
+            );
+            console.log('Updated emails:', updateResult.modifiedCount);
+        }
 
         const stats = {
             unsubscribed: 0,
