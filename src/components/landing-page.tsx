@@ -31,7 +31,7 @@ export function LandingPage() {
             width={200}
             height={50}
             style={{
-              maxWidth: '50%',
+              maxWidth: '80%',
               height: 'auto',
             }}
           />
@@ -63,7 +63,7 @@ export function LandingPage() {
       {/* Right side */}
       <div className="flex-1 bg-white rounded-l-3xl flex flex-col items-center justify-center px-12 py-12 relative">
         <div className="absolute top-4 right-4 flex space-x-2">
-            <Button variant="outline" className="bg-black text-white hover:bg-gray-800" onClick={handleGoogleSignIn}>
+            <Button variant="outline" className="bg-black text-white hover:bg-gray-800 hover:text-white" onClick={handleGoogleSignIn}>
               Try it now
             </Button>
         </div>

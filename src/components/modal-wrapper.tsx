@@ -29,11 +29,11 @@ export function ModalWrapper({ title, children, onNext, isOpen, headerContent }:
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="flex justify-between">
           {headerContent}
         </CardHeader>
         <CardContent>
-        <CardTitle className="text-2xl font-bold text-center">{title}</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center mb-3">{title}</CardTitle>
           {children}
         </CardContent>
         <CardFooter>

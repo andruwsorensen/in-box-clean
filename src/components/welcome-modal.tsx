@@ -83,25 +83,25 @@ export default function WelcomeModal() {
   }
 
   const headerContent = (
-      <div className="relative w-full h-40">
+      <div className="relative w-full h-60">
         <Image
           src={welcomeImage}
           alt="Welcome to InBoxClean"
           fill
-          style={{ objectFit: 'cover' }}
+          style={{ objectFit: 'contain' }}
         />
       </div>
   )
 
   return (
     <ModalWrapper
-      title="Welcome to InBoxClean!" 
+      title="Welcome to InBoxClean! 🗑️" 
       onNext={handleNext}
       isOpen={isOpen}
       headerContent={headerContent}
     >
       <div className="space-y-4">
-        <CardDescription className="text-center">
+        <CardDescription className="text-center text-black mt">
         InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages.
         </CardDescription>
       </div>
