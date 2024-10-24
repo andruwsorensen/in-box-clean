@@ -8,7 +8,6 @@ import { StatsProvider } from '../contexts/StatsContext'
 import WelcomeModal from './welcome-modal'
 import RightSidebar from './right-sidebar'
 import { SessionProvider } from 'next-auth/react';
-import { Session } from 'inspector/promises';
 
 interface LayoutProps {
   children: React.ReactNode
