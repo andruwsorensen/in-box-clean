@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { SubscriptionItem } from './subscription-item'
 import { EmailDetails } from '../types'
 import { useStats } from '../contexts/StatsContext'
+import { useSearchParams } from 'next/navigation';
 
 interface GroupedEmail {
   name: string;
@@ -18,31 +19,35 @@ export function SubscriptionList() {
   const [groupedEmails, setGroupedEmails] = useState<GroupedEmail[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { incrementTrigger } = useStats();
+  const searchParams = useSearchParams();
+  const showModal = searchParams.has('showModal');
 
   useEffect(() => {
-    const fetchEmails = async () => {
-      try {
-        setIsLoading(true);
-        console.log('Fetching emails...');
-        const response = await fetch('/api/subscriptions');
-        if (!response.ok) {
-          throw new Error('Failed to fetch emails');
+    if (!showModal) {
+      const fetchEmails = async () => {
+        try {
+          setIsLoading(true);
+          console.log('Fetching emails...');
+          const response = await fetch('/api/subscriptions');
+          if (!response.ok) {
+            throw new Error('Failed to fetch emails');
+          }
+          const emails: EmailDetails[] = await response.json();
+          console.log('Fetched emails:', emails);
+          const subscribedEmails = emails.filter(email => email.isSubscription);
+          const grouped = groupEmailsBySender(subscribedEmails);
+          console.log('Grouped emails:', grouped);
+          setGroupedEmails(grouped);
+        } catch (error) {
+          console.error('Error fetching emails:', error);
+        } finally {
+          setIsLoading(false);
         }
-        const emails: EmailDetails[] = await response.json();
-        console.log('Fetched emails:', emails);
-        const subscribedEmails = emails.filter(email => email.isSubscription);
-        const grouped = groupEmailsBySender(subscribedEmails);
-        console.log('Grouped emails:', grouped);
-        setGroupedEmails(grouped);
-      } catch (error) {
-        console.error('Error fetching emails:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      };
 
-    fetchEmails();
-  }, []);
+      fetchEmails();
+    }
+  }, [showModal]);
 
   const groupEmailsBySender = (emails: EmailDetails[]): GroupedEmail[] => {
     const groupedMap = new Map<string, GroupedEmail>();
@@ -89,8 +94,7 @@ export function SubscriptionList() {
 
   console.log('Rendering SubscriptionList with groupedEmails:', groupedEmails);
 
-  if (isLoading) {
-    // load blank grayed out subscriptions
+  if (isLoading || showModal) {
     return (
       <div className="space-y-4">
         {Array.from({ length: 12 }, (_, i) => (

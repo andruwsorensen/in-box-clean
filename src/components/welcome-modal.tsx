@@ -71,14 +71,12 @@ export default function WelcomeModal() {
 
       console.log('Emails processed successfully');
 
-      // Navigate to the main page
-      console.log('Navigating to main page...');
       router.replace('/main');
       router.refresh();
       setIsOpen(false);
+      router.refresh();
     } catch (error) {
       console.error('Error processing emails:', error);
-      // Here you might want to show an error message to the user
     }
   }
 

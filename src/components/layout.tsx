@@ -15,27 +15,12 @@ interface LayoutProps {
 
 function LayoutContent({ children }: LayoutProps) {
   const [showModal, setShowModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
 
   useEffect(() => {
-    const checkPrerequisites = async () => {
-      try {
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error checking prerequisites:', error);
-        router.push('/');
-      }
-    };
-
-    checkPrerequisites();
     setShowModal(searchParams.has('showModal'));
   }, [searchParams, router]);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <SessionProvider>
