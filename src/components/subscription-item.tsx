@@ -35,31 +35,15 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
       let unsubscribedCount = 0;
 
       if (isUnsubscribe) {
-        // Fetch email content
-        console.log("from", from);
-        const emailContentResponse = await fetch('/api/email-content', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ from })
-        });
+        console.log("email: ", email);
 
-        if (!emailContentResponse.ok) {
-          throw new Error('Failed to fetch email content');
-        }
-
-        const { emailContent } = await emailContentResponse.json();
-
-        // Call unsubscribe API with the fetched email content
         const unsubscribeResponse = await fetch('/api/unsubscribe', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ 
-            email: from,
-            emailContent
+            email: email,
           })
         });
 
@@ -146,8 +130,8 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
               />
             )}
             <div>
-              <h3 className="font-semibold">{name.split('<')[0]}</h3>
-              <p className="text-sm text-gray-500">{email.includes('<') ? email.split('<')[1].split('>')[0] : email}</p>
+              <h3 className="font-semibold">{ name }</h3>
+              <p className="text-sm text-gray-500">{email}</p>
               <p className="text-sm text-gray-500">
                 {count === 1 ? `${count} email` : `${count} emails`}
                 &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
