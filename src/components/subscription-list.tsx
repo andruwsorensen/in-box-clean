@@ -90,18 +90,36 @@ export function SubscriptionList() {
   console.log('Rendering SubscriptionList with groupedEmails:', groupedEmails);
 
   if (isLoading) {
-    return <div>Loading subscriptions...</div>;
+    // load blank grayed out subscriptions
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 12 }, (_, i) => (
+          <SubscriptionItem
+            key={i}
+            name="Loading..."
+            email="Loading..."
+            count={0}
+            domain="Loading..."
+            from="Loading..."
+            date="Loading..."
+            onStatsUpdate={handleStatsUpdate}
+          />
+        ))}
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
-      {groupedEmails.map((sub, index) => (
-        <SubscriptionItem 
-          key={index} 
-          {...sub} 
-          onStatsUpdate={handleStatsUpdate}
-        />
-      ))}
+      <div>
+        {groupedEmails.map((sub, index) => (
+          <SubscriptionItem 
+            key={index} 
+            {...sub} 
+            onStatsUpdate={handleStatsUpdate}
+          />
+        ))}
+      </div>
     </div>
   )
 }

@@ -30,16 +30,16 @@ export function Statistics() {
   }, [triggerRefetch]);
 
   return (
-    <div>
+    <div className="bg-gray-100 rounded-lg">
       <h2 className="text-xl font-semibold mb-4">Statistics</h2>
-      <div className="bg-gray-100 rounded-lg p-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-4xl font-bold">{stats.unsubscribed}</span>
-          <span className="text-4xl font-bold">{stats.deleted}</span>
+      <div className="flex justify-between space-x-2">
+        <div className="bg-white rounded-lg p-5 shadow-md flex-1">
+          <div className="text-4xl font-bold mb-2">{stats.unsubscribed}</div>
+          <div className="text-sm text-gray-500">Unsubscribed</div>
         </div>
-        <div className="flex justify-between text-sm text-gray-500">
-          <span>Unsubscribed</span>
-          <span>Deleted</span>
+        <div className="bg-white rounded-lg p-5 shadow-md flex-1">
+          <div className="text-4xl font-bold mb-2">{stats.deleted}</div>
+          <div className="text-sm text-gray-500">Deleted</div>
         </div>
       </div>
     </div>

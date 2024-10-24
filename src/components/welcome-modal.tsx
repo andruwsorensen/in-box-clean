@@ -31,8 +31,8 @@ export default function WelcomeModal() {
       const emails: EmailListItem[] = await listResponse.json();
       console.log(`Fetched ${emails.length} emails`);
 
-      // Fetch the email details and save to the database in batches of 100
-      const batchSize = 100;
+      // Fetch the email details and save to the database in batches
+      const batchSize = 250;
       for (let i = 0; i < emails.length; i += batchSize) {
         const batch = emails.slice(i, i + batchSize);
         console.log(`Processing batch ${i / batchSize + 1} of ${Math.ceil(emails.length / batchSize)}`);
@@ -50,7 +50,7 @@ export default function WelcomeModal() {
         console.log(`Fetched ${batchDetails.length} email details for batch ${i / batchSize + 1}`);
 
         // Save the batch to the database in smaller chunks
-        const chunkSize = 25;
+        const chunkSize = 50;
         for (let j = 0; j < batchDetails.length; j += chunkSize) {
           const chunk = batchDetails.slice(j, j + chunkSize);
           console.log(`Saving chunk ${j / chunkSize + 1} of ${Math.ceil(batchDetails.length / chunkSize)} for batch ${i / batchSize + 1}`);
@@ -82,23 +82,27 @@ export default function WelcomeModal() {
     }
   }
 
+  const headerContent = (
+      <div className="relative w-full h-40">
+        <Image
+          src={welcomeImage}
+          alt="Welcome to InBoxClean"
+          fill
+          style={{ objectFit: 'cover' }}
+        />
+      </div>
+  )
+
   return (
     <ModalWrapper
       title="Welcome to InBoxClean!" 
       onNext={handleNext}
       isOpen={isOpen}
+      headerContent={headerContent}
     >
       <div className="space-y-4">
-        <div className="relative w-full h-40 -mt-6 -mx-6">
-          <Image
-            src={welcomeImage}
-            alt="Welcome to InBoxClean"
-            fill
-            style={{ objectFit: 'cover' }}
-          />
-        </div>
         <CardDescription className="text-center">
-          InBoxClean is an app that helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages. With its intelligent scanning and easy-to-use interface, you can regain control over your inbox and enjoy a more organized and stress-free email experience.
+        InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages.
         </CardDescription>
       </div>
     </ModalWrapper>

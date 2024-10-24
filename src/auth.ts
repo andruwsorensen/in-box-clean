@@ -1,5 +1,6 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
+import { NextResponse } from "next/server";
 
 declare module "next-auth" {
   interface Session {
@@ -27,6 +28,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
+    authorized: async ({ auth, request }) => {
+      // Logged in users are authenticated, otherwise redirect to root
+      if (!auth?.access_token && request.nextUrl.pathname !== "/") {
+        return NextResponse.redirect(new URL("/", request.url))
+      }
+      return !!auth
+    },
     jwt({token, account}) {
       if (account) {
         token.access_token = account.access_token
@@ -43,6 +51,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.scope = token.scope as string
       session.token_type = token.token_type as string
       session.expiry_date = token.expiry_date as number
+      session.user.name = token.name as string
+      session.user.image = token.picture as string
+      session.user.email = token.email as string
       return session
     },
   }

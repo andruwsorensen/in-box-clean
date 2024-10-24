@@ -4,10 +4,11 @@ import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Sidebar } from './sidebar'
 import { Header } from './header'
-// import { GetStarted } from './get-started'
-import { Statistics } from './statistics'
 import { StatsProvider } from '../contexts/StatsContext'
 import WelcomeModal from './welcome-modal'
+import RightSidebar from './right-sidebar'
+import { SessionProvider } from 'next-auth/react';
+import { Session } from 'inspector/promises';
 
 interface LayoutProps {
   children: React.ReactNode
@@ -22,12 +23,6 @@ function LayoutContent({ children }: LayoutProps) {
   useEffect(() => {
     const checkPrerequisites = async () => {
       try {
-        // const session = await auth()
-        // if (!session) {
-        //   router.push('/');
-        //   return;
-        // }
-
         setIsLoading(false);
       } catch (error) {
         console.error('Error checking prerequisites:', error);
@@ -44,30 +39,27 @@ function LayoutContent({ children }: LayoutProps) {
   }
 
   return (
+    <SessionProvider>
     <StatsProvider>
-      <div className="flex h-screen bg-gray-100">
+      <div className="flex h-screen bg-white">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
-          {!showModal && (
-            <div className="flex-1 flex overflow-hidden">
-              <main className="flex-1 overflow-y-auto p-4">
-                {children}
-              </main>
-              <aside className="w-80 bg-white p-4 overflow-y-auto">
-                {/* <GetStarted /> // To be implemented later need */}
-                <Statistics />
-              </aside>
-            </div>
-          )}
+          <div className="flex flex-1 overflow-hidden">
+            <main className="flex-1 overflow-y-auto p-4">
+              {children}
+            </main>
+          </div>
         </div>
+        <RightSidebar />
       </div>
       {showModal && <WelcomeModal />}
     </StatsProvider>
+    </SessionProvider>
   )
 }
 
-export default function Layout({ children }: LayoutProps,) {
+export default function Layout({ children }: LayoutProps) {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <LayoutContent>{children}</LayoutContent>

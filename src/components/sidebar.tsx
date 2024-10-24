@@ -5,7 +5,7 @@ import { BellOff, Trash2, Mail } from 'lucide-react'
 
 export function Sidebar() {
   return (
-    <div className="w-64 bg-black text-white p-4">
+    <div className="w-64 bg-black text-white p-4 rounded-r-xl">
       <div className="flex items-center mb-8">
         <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-bold rounded">
           IB

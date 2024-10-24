@@ -8,16 +8,13 @@ export function GetStarted() {
         Follow this 3 simple steps and something more, but I do not know what yet?
       </p>
       <div className="space-y-2">
-        <button className="w-full py-2 px-4 bg-gray-800 text-white rounded flex items-center">
+        <button className="w-full py-2 px-4 bg-gray-800 text-white rounded-3xl flex items-center">
           <span className="mr-2">📝</span> Create Profile
         </button>
-        <button className="w-full py-2 px-4 bg-gray-800 text-white rounded flex items-center">
+        <button className="w-full py-2 px-4 bg-gray-800 text-white rounded-3xl flex items-center">
           <span className="mr-2">🔔</span> Unsubscribe
         </button>
-        <button className="w-full py-2 px-4 bg-gray-800 text-white rounded flex items-center">
-          <span className="mr-2">🗑️</span> Delete Emails
-        </button>
-        <button className="w-full py-2 px-4 bg-gray-800 text-white rounded flex items-center">
+        <button className="w-full py-2 px-4 bg-gray-800 text-white rounded-3xl flex items-center">
           <span className="mr-2">🗑️</span> Delete Emails
         </button>
       </div>

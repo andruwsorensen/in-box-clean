@@ -7,9 +7,10 @@ interface ModalWrapperProps {
   children: ReactNode
   onNext: () => void
   isOpen: boolean
+  headerContent?: ReactNode
 }
 
-export function ModalWrapper({ title, children, onNext, isOpen }: ModalWrapperProps) {
+export function ModalWrapper({ title, children, onNext, isOpen, headerContent }: ModalWrapperProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleNextClick = async () => {
@@ -29,9 +30,10 @@ export function ModalWrapper({ title, children, onNext, isOpen }: ModalWrapperPr
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">{title}</CardTitle>
+          {headerContent}
         </CardHeader>
         <CardContent>
+        <CardTitle className="text-2xl font-bold text-center">{title}</CardTitle>
           {children}
         </CardContent>
         <CardFooter>

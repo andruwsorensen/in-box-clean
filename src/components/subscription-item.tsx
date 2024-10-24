@@ -133,7 +133,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
               <div className="mr-4 w-10 h-10 rounded-full bg-gray-300" />
             ) : (
               <Image
-                src={`https://img.logo.dev/${domain}?token=pk_a9iCu7gpS1uTxP1K1fZeIw`}
+                src={domain === 'Loading...' ? 'https://via.placeholder.com/40' : `https://img.logo.dev/${domain}?token=pk_a9iCu7gpS1uTxP1K1fZeIw`}
                 alt={name}
                 width={40}
                 height={40}
