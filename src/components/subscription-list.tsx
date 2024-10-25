@@ -47,7 +47,7 @@ export function SubscriptionList() {
             setGroupedEmails(prevEmails => [...prevEmails, ...grouped]);
           };
 
-          const batchSize = 1000;
+          const batchSize = 500;
           for (let startIndex = 0; startIndex < emailCount; startIndex += batchSize) {
             await fetchBatch(startIndex, batchSize);
           }
