@@ -38,17 +38,23 @@ interface EmailData {
   userId: string;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const startIndex = parseInt(searchParams.get('startIndex') || '0', 10);
+    const batchSize = parseInt(searchParams.get('batchSize') || '1000', 10);
+
     const client = await clientPromise;
     const db = client.db('in-box-clean');
     const emails = await db.collection("emails")
       .find({ sessionId: session.access_token })
+      .skip(startIndex)
+      .limit(batchSize)
       .toArray();
 
     const extractedEmails: EmailDetails[] = emails.map((email) => ({

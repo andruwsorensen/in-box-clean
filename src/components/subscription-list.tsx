@@ -27,17 +27,30 @@ export function SubscriptionList() {
       const fetchEmails = async () => {
         try {
           setIsLoading(true);
-          console.log('Fetching emails...');
-          const response = await fetch('/api/subscriptions');
-          if (!response.ok) {
-            throw new Error('Failed to fetch emails');
+          console.log('Fetching email count...');
+          const countResponse = await fetch('/api/subscriptions/count');
+          if (!countResponse.ok) {
+            throw new Error('Failed to fetch email count');
           }
-          const emails: EmailDetails[] = await response.json();
-          console.log('Fetched emails:', emails);
-          const subscribedEmails = emails.filter(email => email.isSubscription);
-          const grouped = groupEmailsBySender(subscribedEmails);
-          console.log('Grouped emails:', grouped);
-          setGroupedEmails(grouped);
+          const emailCount: number = await countResponse.json();
+          console.log('Total emails:', emailCount);
+
+          const fetchBatch = async (startIndex: number, batchSize: number) => {
+            const response = await fetch(`/api/subscriptions?startIndex=${startIndex}&batchSize=${batchSize}`);
+            if (!response.ok) {
+              throw new Error('Failed to fetch email batch');
+            }
+            const emails: EmailDetails[] = await response.json();
+            console.log(`Fetched ${emails.length} emails (${startIndex} to ${startIndex + batchSize - 1})`);
+            const subscribedEmails = emails.filter(email => email.isSubscription);
+            const grouped = groupEmailsBySender(subscribedEmails);
+            setGroupedEmails(prevEmails => [...prevEmails, ...grouped]);
+          };
+
+          const batchSize = 1000;
+          for (let startIndex = 0; startIndex < emailCount; startIndex += batchSize) {
+            await fetchBatch(startIndex, batchSize);
+          }
         } catch (error) {
           console.error('Error fetching emails:', error);
         } finally {
