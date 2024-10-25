@@ -3,7 +3,6 @@ import { listMessages, EmailDetails } from '@/app/api/utils/gmail';
 import { auth } from '@/auth';
 import { google } from 'googleapis';
 import clientPromise from '@/lib/mongodb';
-import { access } from 'fs';
 
 export async function GET() {
     try {
