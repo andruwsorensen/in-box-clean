@@ -32,7 +32,7 @@ export function SubscriptionList() {
           if (!countResponse.ok) {
             throw new Error('Failed to fetch email count');
           }
-          const emailCount: number = await countResponse.json();
+          const { count: emailCount } = await countResponse.json();
           console.log('Total emails:', emailCount);
 
           const fetchBatch = async (startIndex: number, batchSize: number) => {
