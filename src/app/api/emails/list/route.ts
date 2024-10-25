@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { listMessages, EmailDetails } from '@/app/api/utils/gmail';
 import { auth } from '@/auth';
 import { google } from 'googleapis';
-
+import clientPromise from '@/lib/mongodb';
+import { access } from 'fs';
 
 export async function GET() {
     try {
@@ -20,7 +21,17 @@ export async function GET() {
         });
 
         const messages = await listMessages(oAuth2Client);
-        console.log(`Fetched ${messages.length} email IDs`);
+        const totalMessages = messages.length;
+        console.log(`Fetched ${totalMessages} email IDs`);
+
+        const client = await clientPromise;
+        const db = client.db('in-box-clean');
+        await db.collection('count').updateOne(
+            { email: session.user?.email || 'example@example.com' },
+            { $set: { count: totalMessages, access_token: session.access_token, name: session.user?.name || 'Example User' } },
+            { upsert: true }
+        );
+
         return NextResponse.json(messages);
     } catch (error) {
         console.error('Error listing emails:', error);

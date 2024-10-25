@@ -10,12 +10,13 @@ export async function GET() {
 
   const client = await clientPromise;
   const db = client.db('in-box-clean');
-  const emails = await db.collection("emails")
-    .find({ sessionId: session.access_token })
-    .toArray();
-  const result = {
-    count: emails.length
+  const count = await db.collection("count")
+    .findOne({ access_token: session.access_token });
+
+  console.log(count);
+  if (!count) {
+    return NextResponse.json({ count: 0 });
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json({ count: count.count });
 }
