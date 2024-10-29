@@ -35,6 +35,8 @@ export function SubscriptionList() {
           const { count: emailCount } = await countResponse.json();
           console.log('Total emails:', emailCount);
 
+          const groupedMap = new Map<string, GroupedEmail>();
+
           const fetchBatch = async (startIndex: number, batchSize: number) => {
             const response = await fetch(`/api/subscriptions?startIndex=${startIndex}&batchSize=${batchSize}`);
             if (!response.ok) {
@@ -43,14 +45,34 @@ export function SubscriptionList() {
             const emails: EmailDetails[] = await response.json();
             console.log(`Fetched ${emails.length} emails (${startIndex} to ${startIndex + batchSize - 1})`);
             const subscribedEmails = emails.filter(email => email.isSubscription);
-            const grouped = groupEmailsBySender(subscribedEmails);
-            setGroupedEmails(prevEmails => [...prevEmails, ...grouped]);
+            subscribedEmails.forEach(email => {
+              const key = email.fromEmail;
+              if (groupedMap.has(key)) {
+                const existingGroup = groupedMap.get(key)!;
+                existingGroup.count++;
+                // Update the date if the email is older than the current one
+                if (new Date(email.date) > new Date(existingGroup.date)) {
+                  existingGroup.date = email.date;
+                }
+              } else {
+                groupedMap.set(key, {
+                  name: email.fromName,
+                  email: key,
+                  count: 1,
+                  domain: email.fromDomain,
+                  from: email.from,
+                  date: email.date
+                });
+              }
+            });
           };
 
           const batchSize = 500;
           for (let startIndex = 0; startIndex < emailCount; startIndex += batchSize) {
             await fetchBatch(startIndex, batchSize);
           }
+
+          setGroupedEmails(Array.from(groupedMap.values()).sort((a, b) => b.count - a.count));
         } catch (error) {
           console.error('Error fetching emails:', error);
         } finally {
@@ -61,32 +83,6 @@ export function SubscriptionList() {
       fetchEmails();
     }
   }, [showModal]);
-
-  const groupEmailsBySender = (emails: EmailDetails[]): GroupedEmail[] => {
-    const groupedMap = new Map<string, GroupedEmail>();
-
-    emails.forEach(email => {
-      const key = email.fromEmail;
-      if (groupedMap.has(key)) {
-        groupedMap.get(key)!.count++;
-        // Update the date if the email is older than the current one
-        if (new Date(email.date) > new Date(groupedMap.get(key)!.date)) {
-          groupedMap.get(key)!.date = email.date;
-        }
-      } else {
-        groupedMap.set(key, {
-          name: email.fromName,
-          email: key,
-          count: 1,
-          domain: email.fromDomain,
-          from: email.from,
-          date: email.date
-        });
-      }
-    });
-
-    return Array.from(groupedMap.values()).sort((a, b) => b.count - a.count);
-  };
 
   const handleStatsUpdate = async (deletedCount: number, unsubscribedCount: number) => {
     console.log('handleStatsUpdate', { deletedCount, unsubscribedCount });

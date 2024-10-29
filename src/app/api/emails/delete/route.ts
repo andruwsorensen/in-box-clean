@@ -14,8 +14,36 @@ async function deleteEmailsFromDB(ids: string[]) {
         const db = client.db('in-box-clean');
         const deletedCount = await db.collection('emails').deleteMany({ id: { $in: ids } });
         console.log(`Deleted ${deletedCount.deletedCount} emails from the database.`);
+        return deletedCount.deletedCount;
     } catch (error) {
         console.error('Error deleting emails from the database:', error);
+        throw error;
+    }
+}
+
+async function updateDeletedCount(session: any, deletedCount: number) {
+    try {
+        const client = await clientPromise;
+        const db = client.db('in-box-clean');
+        const existingCount = await db.collection('count').findOne({ access_token: session.access_token });
+
+        if (existingCount) {
+            const updatedCount = existingCount.count - deletedCount;
+            await db.collection('count').updateOne(
+                { access_token: session.access_token },
+                { $set: { count: updatedCount } }
+            );
+            console.log(`Updated count to ${updatedCount}`);
+        } else {
+            console.log('No existing count found, creating new entry');
+            await db.collection('count').insertOne({
+                access_token: session.access_token,
+                count: 0,
+                name: session.user?.name
+            });
+        }
+    } catch (error) {
+        console.error('Error updating count:', error);
         throw error;
     }
 }
@@ -43,7 +71,8 @@ export async function POST(request: Request) {
         const ids: string[] = res.data.messages?.map(msg => msg.id ?? '') ?? [];
 
         if (ids.length === 0) {
-            await deleteEmailsFromDB(ids);
+            const deletedCount = await deleteEmailsFromDB(ids);
+            await updateDeletedCount(session, deletedCount);
             return NextResponse.json({ 
                 code: 200,
                 message: `No emails found from ${email} in Gmail`,
@@ -67,12 +96,13 @@ export async function POST(request: Request) {
 
         console.log(`Batch moved ${ids.length} messages from ${email} to trash.`);
 
-        await deleteEmailsFromDB(ids);
+        const deletedCount = await deleteEmailsFromDB(ids);
+        await updateDeletedCount(session, deletedCount);
 
         return NextResponse.json({ 
             code: 200, 
             message: 'Emails moved to trash successfully',
-            deletedCount: ids.length 
+            deletedCount: deletedCount
         })
     }
     catch (err) {
@@ -80,4 +110,3 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to move emails to trash' }, { status: 500 });
     }    
 }
-

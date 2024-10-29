@@ -18,7 +18,7 @@ export async function GET() {
 
         const client = await clientPromise;
         const db = client.db('in-box-clean');
-        const stats = await db.collection<Stats>('stats').findOne({ sessionId: session.access_token });
+        const stats = await db.collection<Stats>('subscriptionStats').findOne({ sessionId: session.access_token });
 
         if (!stats) {
             return NextResponse.json({ error: 'Stats not found' }, { status: 404 });
@@ -44,14 +44,14 @@ export async function POST(request: Request) {
         const { deleted, unsubscribed } = await request.json();
         console.log('Updating stats:', { deleted, unsubscribed });
 
-        const existingStats = await db.collection<Stats>('stats').findOne({ sessionId: session.access_token });
+        const existingStats = await db.collection<Stats>('subscriptionStats').findOne({ sessionId: session.access_token });
 
         const updateQuery: Partial<Stats> = {
             deleted: (existingStats?.deleted || 0) + (deleted || 0),
             unsubscribed: (existingStats?.unsubscribed || 0) + (unsubscribed || 0),
         };
 
-        const result = await db.collection<Stats>('stats').updateOne(
+        const result = await db.collection<Stats>('subscriptionStats').updateOne(
             { sessionId: session.access_token },
             { $set: updateQuery },
             { upsert: true }

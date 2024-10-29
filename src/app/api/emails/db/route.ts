@@ -59,15 +59,19 @@ export async function POST(request: Request) {
             console.log('Updated emails:', updateResult.modifiedCount);
         }
 
-        const stats = {
-            unsubscribed: 0,
-            deleted: 0,
-            expires: session.expires,
-            sessionId: session.access_token
-        };
+        const existingStats = await db.collection('subscriptionStats').findOne({ sessionId: session.access_token });
 
-        console.log('Inserting stats...');
-        await db.collection('stats').insertOne({ ...stats });
+        if (!existingStats) {
+            const stats = {
+                unsubscribed: 0,
+                deleted: 0,
+                expires: session.expires,
+                sessionId: session.access_token
+            };
+
+            console.log('Inserting stats...');
+            await db.collection('subscriptionStats').insertOne({ ...stats });
+        }
 
         const result: DatabaseOperationResult = {
             inserted: insertResult.insertedCount,
