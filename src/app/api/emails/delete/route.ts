@@ -3,6 +3,7 @@ import { google, gmail_v1 } from 'googleapis';
 import { NextResponse } from 'next/server';
 import { GaxiosResponse } from 'gaxios';
 import clientPromise from '@/lib/mongodb';
+import { Session } from 'next-auth';
 
 interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListMessagesResponse> {
     status: number;
@@ -21,7 +22,7 @@ async function deleteEmailsFromDB(ids: string[]) {
     }
 }
 
-async function updateDeletedCount(session: any, deletedCount: number) {
+async function updateDeletedCount(session: Session, deletedCount: number) {
     try {
         const client = await clientPromise;
         const db = client.db('in-box-clean');

@@ -94,7 +94,13 @@ export function LandingPage() {
             onClick={handleGoogleSignIn}
             disabled={isLoading}
           >
-            <img src="https://img.logo.dev/google.com?token=pk_a9iCu7gpS1uTxP1K1fZeIw" alt="Google logo" width={24} height={24} className="mr-2 rounded-full" />
+            <Image
+              src="https://img.logo.dev/google.com?token=pk_a9iCu7gpS1uTxP1K1fZeIw"
+              alt="Google logo"
+              width={24}
+              height={24}
+              className="mr-2 rounded-full"
+            />
             {isLoading ? 'Loading...' : 'Sign in with Google'}
           </Button>
         </div>
