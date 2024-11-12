@@ -81,18 +81,26 @@ export async function POST(request: Request) {
             })
         }
 
-        try {
-            await gmail.users.messages.batchModify({
-                userId: 'me',
-                requestBody: {
-                    ids,
-                    addLabelIds: ['TRASH'],
-                    removeLabelIds: ['INBOX'],
-                },
-            });
-        } catch (error) {
-            console.error('Error batch modifying messages:', error);
-            return NextResponse.json({ error: 'Failed to move emails to trash' }, { status: 500 });
+        const batchSize = 100;
+        const batches = [];
+        for (let i = 0; i < ids.length; i += batchSize) {
+            batches.push(ids.slice(i, i + batchSize));
+        }
+
+        for (const batch of batches) {
+            try {
+                await gmail.users.messages.batchModify({
+                    userId: 'me',
+                    requestBody: {
+                        ids: batch,
+                        addLabelIds: ['TRASH'],
+                        removeLabelIds: ['INBOX'],
+                    },
+                });
+            } catch (error) {
+                console.error('Error batch modifying messages:', error);
+                return NextResponse.json({ error: 'Failed to move emails to trash' }, { status: 500 });
+            }
         }
 
         console.log(`Batch moved ${ids.length} messages from ${email} to trash.`);
