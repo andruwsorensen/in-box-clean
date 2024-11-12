@@ -11,11 +11,6 @@ interface EmailListItem {
   snippet: string;
 }
 
-interface DatabaseOperationResult {
-  inserted: number;
-  updated: number;
-}
-
 interface ProcessingStatus {
   processed: number;
   total: number;
