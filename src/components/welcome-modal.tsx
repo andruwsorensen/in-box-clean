@@ -20,6 +20,7 @@ interface ProcessingStatus {
 
 export default function WelcomeModal() {
     const [isOpen, setIsOpen] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState<ProcessingStatus | null>(null);
     const router = useRouter();
 
@@ -66,6 +67,8 @@ export default function WelcomeModal() {
 
     const handleNext = async () => {
       try {
+        setIsLoading(true);
+
         // Fetch the list of emails
         const listResponse = await fetch('/api/emails/list');
         if (!listResponse.ok) {
@@ -111,10 +114,12 @@ export default function WelcomeModal() {
         router.refresh();
       } catch (error) {
         console.error('Error processing emails:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
-    const headerContent = (
+    const headerContent = isLoading ? null : (
       <div className="relative w-full h-60">
         <Image
           src={welcomeImage}
@@ -127,30 +132,48 @@ export default function WelcomeModal() {
 
     return (
       <ModalWrapper
-        title="Welcome to InBoxClean! 🗑️" 
+        title={isLoading ? "Scanning for emails" : "Welcome to InBoxClean! 🗑️"} 
         onNext={handleNext}
         isOpen={isOpen}
         headerContent={headerContent}
       >
         <div className="space-y-4">
-          <CardDescription className="text-center text-black mt">
-            InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages.
-          </CardDescription>
-          
-          {progress && (
-            <div className="mt-4">
-              <div className="w-full bg-gray-200 rounded">
-                <div 
-                  className="bg-blue-500 rounded h-2 transition-all duration-200" 
-                  style={{ width: `${(progress.processed / progress.total) * 100}%` }}
-                />
+          {isLoading ? (
+            progress ? (
+              <div className="relative w-32 h-32 mx-auto">
+                <svg className="w-full h-full" viewBox="0 0 100 100">
+                  <circle
+                    className="text-gray-200"
+                    strokeWidth="10"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="45"
+                    cx="50"
+                    cy="50"
+                  />
+                  <circle
+                    className="text-orange-500"
+                    strokeWidth="10"
+                    strokeDasharray={2 * Math.PI * 45}
+                    strokeDashoffset={2 * Math.PI * 45 - (progress?.processed / progress?.total || 0) * 2 * Math.PI * 45}
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="45"
+                    cx="50"
+                    cy="50"
+                    transform="rotate(-90 50 50)"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-2xl font-semibold">{Math.round((progress?.processed / progress?.total || 0) * 100)}%</span>
+                </div>
               </div>
-              <p className="mt-2 text-sm text-gray-600 text-center">
-                Processing batch {progress.currentBatch} of {progress.totalBatches}
-                <br />
-                {progress.processed} of {progress.total} emails processed
-              </p>
-            </div>
+            ) : null
+          ) : (
+            <CardDescription className="text-center text-black mt">
+              InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages.
+            </CardDescription>
           )}
         </div>
       </ModalWrapper>
