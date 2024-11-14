@@ -112,43 +112,45 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
     <>
       <Card className="mb-4">
         <CardContent className="flex items-center justify-between p-4">
-          <div className="flex items-center">
-            {domain === 'Unknown' ? (
-              <div className="mr-4 w-10 h-10 rounded-full bg-gray-300" />
-            ) : (
-              <Image
-                src={domain === 'Loading...' ? 'https://via.placeholder.com/40' : `https://img.logo.dev/${domain}?token=pk_a9iCu7gpS1uTxP1K1fZeIw`}
-                alt={name}
-                width={40}
-                height={40}
-                style={{
-                  maxWidth: '100%',
-                  height: 'auto',
-                  borderRadius: '10%',
-                }}
-                className="mr-4"
-              />
-            )}
-            <div>
-              <h3 className="font-semibold">{ name }</h3>
-              <p className="text-sm text-gray-500">{email}</p>
-              <p className="text-sm text-gray-500">
-                {count === 1 ? `${count} email` : `${count} emails`}
-                &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
-                Last email {date}
-              </p>
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center">
+              {domain === 'Unknown' ? (
+                <div className="mr-4 w-10 h-10 rounded-full bg-gray-300" />
+              ) : (
+                <Image
+                  src={domain === 'Loading...' ? 'https://via.placeholder.com/40' : `https://img.logo.dev/${domain}?token=pk_a9iCu7gpS1uTxP1K1fZeIw`}
+                  alt={name}
+                  width={40}
+                  height={40}
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    borderRadius: '10%',
+                  }}
+                  className="mr-4"
+                />
+              )}
+              <div>
+                <h3 className="font-semibold">{ name }</h3>
+                <p className="text-sm text-gray-500">{email}</p>
+                <p className="text-sm text-gray-500">
+                  {count === 1 ? `${count} email` : `${count} emails`}
+                  &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
+                  Last email {date}
+                </p>
+              </div>
             </div>
-          </div>
-          <div>
-            <Button variant="outline" className="mr-2" onClick={() => setIsDialogOpen(true)}>
-              <ThumbsUp className="mr-2" />  Keep
-            </Button>
-            <Button variant="outline" onClick={() => {
-              setIsDialogOpen(true);
-              setIsUnsubscribeAction(true);
-            }}>
-              <ThumbsDown className="mr-2" /> Unsubscribe
-            </Button>
+            <div className="flex">
+              <Button variant="outline" className="mr-2" onClick={() => setIsDialogOpen(true)}>
+                <ThumbsUp className="mr-2" />  Keep
+              </Button>
+              <Button variant="outline" onClick={() => {
+                setIsDialogOpen(true);
+                setIsUnsubscribeAction(true);
+              }}>
+                <ThumbsDown className="mr-2" /> Unsubscribe
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

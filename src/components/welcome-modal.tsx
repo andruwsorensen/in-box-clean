@@ -132,7 +132,7 @@ export default function WelcomeModal() {
 
     return (
       <ModalWrapper
-        title={isLoading ? "Scanning for emails" : "Welcome to InBoxClean! 🗑️"} 
+        title={isLoading ? "Scanning for emails 📧" : "Welcome to InBoxClean! 🗑️"} 
         onNext={handleNext}
         isOpen={isOpen}
         headerContent={headerContent}

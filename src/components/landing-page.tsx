@@ -7,9 +7,11 @@ import landingPageImage from "../public/images/landing-page-image.png"
 import { Clock, Trash2, Shield } from "lucide-react"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
+import { useMediaQuery } from 'react-responsive'
 
 export function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const isSmallScreen = useMediaQuery({ maxWidth: 767 })
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -21,29 +23,30 @@ export function LandingPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-black">
+    <div className="flex flex-col min-h-screen bg-black md:flex-row">
       {/* Left side */}
-      <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 relative">
-        <div className="absolute top-0 left-0 p-8">
-          <Image 
-            src={logo}
-            alt="InBoxClean"
-            width={200}
-            height={50}
-            style={{
-              maxWidth: '80%',
-              height: 'auto',
-            }}
-          />
-        </div>
+      <div className="flex-1 flex flex-col items-center justify-center px-8 py-12 relative md:px-12">
+        {!isSmallScreen && (
+          <div className="absolute top-0 left-0 p-8">
+            <Image 
+              src={logo}
+              alt="InBoxClean"
+              width={200}
+              height={50}
+              style={{
+                maxWidth: '70%',
+              }}
+            />
+          </div>
+        )}
         <div className="w-full max-w-3xl flex flex-col items-center">
           <div className="max-w-3xl">
-            <h1 className="text-white text-5xl font-bold leading-tight mb-4">
+            <h1 className="text-white text-2xl sm:text-xl md:text-4xl font-bold leading-tight mb-4">
               Unsubscribe, Delete,
               <br />
               and Breathe Easy
             </h1>
-            <p className="text-gray-400 text-xl mb-8">
+            <p className="text-gray-400 text-sm sm:text-lg md:text-xl mb-8">
               Simplify your email management and enjoy a more
               <br />
               organized, stress-free inbox.
@@ -61,15 +64,17 @@ export function LandingPage() {
       </div>
 
       {/* Right side */}
-      <div className="flex-1 bg-white rounded-l-3xl flex flex-col items-center justify-center px-12 py-12 relative">
-        <div className="absolute top-4 right-4 flex space-x-2">
+      <div className="flex-1 bg-white rounded-l-3xl flex flex-col items-center justify-center px-8 py-12 relative md:px-12">
+        {!isSmallScreen && (
+          <div className="absolute top-4 right-4 flex space-x-2">
             <Button variant="outline" className="bg-black text-white hover:bg-gray-800 hover:text-white" onClick={handleGoogleSignIn}>
               Try it now
             </Button>
-        </div>
+          </div>
+        )}
 
         <div className="w-full max-w-md space-y-8">
-          <h2 className="text-3xl font-bold mb-6">Simplify Your Inbox</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6">Simplify Your Inbox</h2>
           
           <div className="space-y-6">
             <FeatureItem 
