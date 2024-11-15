@@ -139,37 +139,35 @@ export default function WelcomeModal() {
       >
         <div className="space-y-4">
           {isLoading ? (
-            progress ? (
-              <div className="relative w-32 h-32 mx-auto">
-                <svg className="w-full h-full" viewBox="0 0 100 100">
-                  <circle
-                    className="text-gray-200"
-                    strokeWidth="10"
-                    stroke="currentColor"
-                    fill="transparent"
-                    r="45"
-                    cx="50"
-                    cy="50"
-                  />
-                  <circle
-                    className="text-orange-500"
-                    strokeWidth="10"
-                    strokeDasharray={2 * Math.PI * 45}
-                    strokeDashoffset={2 * Math.PI * 45 - (progress?.processed / progress?.total || 0) * 2 * Math.PI * 45}
-                    strokeLinecap="round"
-                    stroke="currentColor"
-                    fill="transparent"
-                    r="45"
-                    cx="50"
-                    cy="50"
-                    transform="rotate(-90 50 50)"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl font-semibold">{Math.round((progress?.processed / progress?.total || 0) * 100)}%</span>
-                </div>
+            <div className="relative w-32 h-32 mx-auto">
+              <svg className="w-full h-full" viewBox="0 0 100 100">
+                <circle
+                  className="text-gray-200"
+                  strokeWidth="10"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="45"
+                  cx="50"
+                  cy="50"
+                />
+                <circle
+                  className="text-orange-500"
+                  strokeWidth="10"
+                  strokeDasharray={2 * Math.PI * 45}
+                  strokeDashoffset={2 * Math.PI * 45 - (progress ? (progress.processed / progress.total) : 0) * 2 * Math.PI * 45}
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="45"
+                  cx="50"
+                  cy="50"
+                  transform="rotate(-90 50 50)"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-2xl font-semibold">{Math.round((progress ? (progress.processed / progress.total) : 0) * 100)}%</span>
               </div>
-            ) : null
+            </div>
           ) : (
             <CardDescription className="text-center text-black mt">
               InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages.
