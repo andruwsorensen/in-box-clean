@@ -15,6 +15,40 @@ interface SubscriptionItemProps {
   onStatsUpdate: (deletedCount: number, unsubscribedCount: number) => void
 }
 
+const formatTimeSince = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+
+  const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+  if (years > 0) {
+    return `${years} year${years === 1 ? '' : 's'} ago`;
+  }
+
+  const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30.44));
+  if (months > 0) {
+    return `${months} month${months === 1 ? '' : 's'} ago`;
+  }
+
+  const weeks = Math.floor(diff / (1000 * 60 * 60 * 24 * 7));
+  if (weeks > 0) {
+    return `${weeks} week${weeks === 1 ? '' : 's'} ago`;
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days > 0) {
+    return `${days} day${days === 1 ? '' : 's'} ago`;
+  }
+
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  if (hours > 0) {
+    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  }
+
+  const minutes = Math.floor(diff / (1000 * 60));
+  return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+};
+
 export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({ 
   name, 
   email, 
@@ -136,7 +170,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
                 <p className="text-sm text-gray-500">
                   {count === 1 ? `${count} email` : `${count} emails`}
                   &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
-                  Last email {date}
+                  Last email {formatTimeSince(date)}
                 </p>
               </div>
             </div>

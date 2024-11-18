@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { BellOff, Trash2, Mail } from 'lucide-react'
+import Image from 'next/image'
+import logo from '../public/images/logo.png'
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -10,10 +12,15 @@ export function Sidebar() {
   return (
     <div className="w-64 bg-black text-white p-4 rounded-r-xl">
       <div className="flex items-center mb-14">
-        <div className="w-8 h-8 bg-white text-black flex items-center justify-center font-bold rounded">
-          IB
-        </div>
-        <span className="ml-2 text-xl font-semibold">InBoxClean</span>
+        <Image
+          src={logo}
+          alt="InBoxClean"
+          width={200}
+          height={50}
+          style= {{
+            maxWidth: '70%',
+          }}
+        />
       </div>
       <nav>
         <Link href="/main" className={`block w-full text-left py-2 px-4 rounded ${pathname === '/main' ? 'bg-gray-800' : 'hover:bg-gray-800'} mb-2 flex items-center`}>
