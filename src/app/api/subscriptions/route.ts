@@ -22,6 +22,13 @@ interface EmailHeader {
 
 interface EmailPayload {
   headers: EmailHeader[];
+  parts?: {
+    1?: {
+      body?: {
+        data?: string;
+      }
+    }
+  }
 }
 
 interface EmailData {
@@ -80,9 +87,11 @@ export async function GET(request: Request) {
           (header.name === 'Subject' &&
             (header.value.toLowerCase().includes('newsletter') ||
               header.value.toLowerCase().includes('digest')))
-        )
+        ) ||
+        (email.payload.parts?.['1']?.body?.data && /(<a\s+.*?href=".*?unsubscribe.*?">.*?<\/a>)/i.test(Buffer.from(email.payload.parts['1'].body.data, 'base64').toString('utf-8'))) ||
+        (email.payload.parts?.['1']?.body?.data && />\s*Unsubscribe\s*</i.test(Buffer.from(email.payload.parts['1'].body.data, 'base64').toString('utf-8')))
       )
-    }));
+    }));  
 
     return NextResponse.json(extractedEmails);
   } catch (error) {
