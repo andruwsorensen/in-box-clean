@@ -59,19 +59,19 @@ export async function POST(request: Request) {
             console.log('Updated emails:', updateResult.modifiedCount);
         }
 
-        const existingStats = await db.collection('subscriptionStats').findOne({ userEmail });
-
-        if (!existingStats) {
-            const stats = {
-                unsubscribed: 0,
-                deleted: 0,
-                expires: session.expires,
-                userEmail
-            };
-
-            console.log('Inserting stats...');
-            await db.collection('subscriptionStats').insertOne({ ...stats });
-        }
+        // Use upsert to ensure only one stats document per user
+        await db.collection('subscriptionStats').updateOne(
+            { userEmail },
+            {
+                $setOnInsert: {
+                    unsubscribed: 0,
+                    deleted: 0,
+                    expires: session.expires,
+                    userEmail
+                }
+            },
+            { upsert: true }
+        );
 
         const result: DatabaseOperationResult = {
             inserted: insertResult.insertedCount,

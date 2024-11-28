@@ -46,16 +46,18 @@ export async function POST(request: Request) {
 
         const existingStats = await db.collection<Stats>('subscriptionStats').findOne({ userEmail: session.user.email });
 
+        if (!existingStats) {
+            return NextResponse.json({ error: 'Stats not found' }, { status: 404 });
+        }
+
         const updateQuery: Partial<Stats> = {
-            deleted: (existingStats?.deleted || 0) + (deleted || 0),
-            unsubscribed: (existingStats?.unsubscribed || 0) + (unsubscribed || 0),
-            userEmail: session.user.email
+            deleted: existingStats.deleted + (deleted || 0),
+            unsubscribed: existingStats.unsubscribed + (unsubscribed || 0)
         };
 
         const result = await db.collection<Stats>('subscriptionStats').updateOne(
             { userEmail: session.user.email },
-            { $set: updateQuery },
-            { upsert: true }
+            { $set: updateQuery }
         );
 
         console.log('Updated stats:', result);
