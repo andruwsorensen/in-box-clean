@@ -87,7 +87,8 @@ export async function POST(request: Request) {
             batches.push(ids.slice(i, i + batchSize));
         }
 
-        for (const batch of batches) {
+        for (let i = 0; i < batches.length; i++) {
+            const batch = batches[i];
             try {
                 await gmail.users.messages.batchModify({
                     userId: 'me',
@@ -97,6 +98,10 @@ export async function POST(request: Request) {
                         removeLabelIds: ['INBOX'],
                     },
                 });
+                // Add a delay between batches to avoid going over the quota
+                if (i < batches.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second
+                }
             } catch (error) {
                 console.error('Error batch modifying messages:', error);
                 return NextResponse.json({ error: 'Failed to move emails to trash' }, { status: 500 });

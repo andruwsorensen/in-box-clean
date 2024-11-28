@@ -6,19 +6,19 @@ export interface Stats {
     unsubscribed: number;
     deleted: number;
     expires: number;
-    sessionId: string;
+    userEmail: string;
 }
 
 export async function GET() {
     try {
         const session = await auth();
-        if (!session) {
+        if (!session?.user?.email) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const client = await clientPromise;
         const db = client.db('in-box-clean');
-        const stats = await db.collection<Stats>('subscriptionStats').findOne({ sessionId: session.access_token });
+        const stats = await db.collection<Stats>('subscriptionStats').findOne({ userEmail: session.user.email });
 
         if (!stats) {
             return NextResponse.json({ error: 'Stats not found' }, { status: 404 });
@@ -34,7 +34,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const session = await auth();
-        if (!session) {
+        if (!session?.user?.email) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -44,15 +44,16 @@ export async function POST(request: Request) {
         const { deleted, unsubscribed } = await request.json();
         console.log('Updating stats:', { deleted, unsubscribed });
 
-        const existingStats = await db.collection<Stats>('subscriptionStats').findOne({ sessionId: session.access_token });
+        const existingStats = await db.collection<Stats>('subscriptionStats').findOne({ userEmail: session.user.email });
 
         const updateQuery: Partial<Stats> = {
             deleted: (existingStats?.deleted || 0) + (deleted || 0),
             unsubscribed: (existingStats?.unsubscribed || 0) + (unsubscribed || 0),
+            userEmail: session.user.email
         };
 
         const result = await db.collection<Stats>('subscriptionStats').updateOne(
-            { sessionId: session.access_token },
+            { userEmail: session.user.email },
             { $set: updateQuery },
             { upsert: true }
         );

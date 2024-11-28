@@ -22,8 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           prompt: 'consent',
           access_type: 'offline',
           response_type: 'code',
-          scope: "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/gmail.settings.sharing https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.profile"  
-        }
+          scope: "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/gmail.settings.sharing https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"        }
       }
     })
   ],

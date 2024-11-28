@@ -50,7 +50,6 @@ export function SubscriptionList() {
               if (groupedMap.has(key)) {
                 const existingGroup = groupedMap.get(key)!;
                 existingGroup.count++;
-                // Update the date if the email is older than the current one
                 if (new Date(email.date) > new Date(existingGroup.date)) {
                   existingGroup.date = email.date;
                 }
@@ -67,9 +66,23 @@ export function SubscriptionList() {
             });
           };
 
+          // Process in parallel batches
           const batchSize = 500;
-          for (let startIndex = 0; startIndex < emailCount; startIndex += batchSize) {
-            await fetchBatch(startIndex, batchSize);
+          const parallelBatches = 3; // Number of batches to process in parallel
+          
+          for (let startIndex = 0; startIndex < emailCount; startIndex += (batchSize * parallelBatches)) {
+            const batchPromises = [];
+            
+            // Create promises for parallel batch fetches
+            for (let i = 0; i < parallelBatches; i++) {
+              const currentStartIndex = startIndex + (i * batchSize);
+              if (currentStartIndex < emailCount) {
+                batchPromises.push(fetchBatch(currentStartIndex, batchSize));
+              }
+            }
+            
+            // Wait for all parallel batches to complete
+            await Promise.all(batchPromises);
           }
 
           setGroupedEmails(Array.from(groupedMap.values()).sort((a, b) => b.count - a.count));

@@ -77,7 +77,7 @@ export default function WelcomeModal() {
         const emails: EmailListItem[] = await listResponse.json();
         
         // Limit to 5000 emails
-        const limitedEmails = emails.slice(0, 3000);
+        const limitedEmails = emails.slice(0, 6000);
 
         // Initialize progress
         setProgress({

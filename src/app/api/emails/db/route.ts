@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     try {
         console.log('Saving emails to the database...');
         const session = await auth();
-        if (!session?.access_token) {
+        if (!session?.user?.email) {
             console.log('Unauthorized access');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
         const client = await clientPromise;
         const db = client.db('in-box-clean');
-        const sessionId = session.access_token;
+        const userEmail = session.user.email;
         const expires = session.expires;
 
         console.log('Checking for existing email IDs...');
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
         if (emailsToInsert.length > 0) {
             console.log(`Inserting ${emailsToInsert.length} new emails...`);
             insertResult = await db.collection('emails').insertMany(
-                emailsToInsert.map(email => ({ ...email, sessionId, expires }))
+                emailsToInsert.map(email => ({ ...email, userEmail, expires }))
             );
         }
 
@@ -54,19 +54,19 @@ export async function POST(request: Request) {
             console.log(`Updating ${emailsToUpdate.length} existing emails...`);
             updateResult = await db.collection('emails').updateMany(
                 { id: { $in: emailsToUpdate.map(email => email.id) } },
-                { $set: { sessionId, expires } }
+                { $set: { userEmail, expires } }
             );
             console.log('Updated emails:', updateResult.modifiedCount);
         }
 
-        const existingStats = await db.collection('subscriptionStats').findOne({ sessionId: session.access_token });
+        const existingStats = await db.collection('subscriptionStats').findOne({ userEmail });
 
         if (!existingStats) {
             const stats = {
                 unsubscribed: 0,
                 deleted: 0,
                 expires: session.expires,
-                sessionId: session.access_token
+                userEmail
             };
 
             console.log('Inserting stats...');

@@ -48,7 +48,7 @@ interface EmailData {
 export async function GET(request: Request) {
   try {
     const session = await auth();
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
     const client = await clientPromise;
     const db = client.db('in-box-clean');
     const emails = await db.collection("emails")
-      .find({ sessionId: session.access_token })
+      .find({ userEmail: session.user.email })
       .skip(startIndex)
       .limit(batchSize)
       .toArray();
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     const session = await auth();
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
         const client = await clientPromise;
         const db = client.db('in-box-clean');
         const updatedEmails = await db.collection<EmailData>('emails').updateMany(
-          { sessionId: session.access_token, 'payload.headers': { $elemMatch: { name: 'From', value: { $regex: email, $options: 'i' } } } },
+          { userEmail: session.user.email, 'payload.headers': { $elemMatch: { name: 'From', value: { $regex: email, $options: 'i' } } } },
           { $push: { 'payload.headers': { $each: [{ name: 'Subscribed', value: 'This was kept' }] } } }
         );
         console.log(updatedEmails);
