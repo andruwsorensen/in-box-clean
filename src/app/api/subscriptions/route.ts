@@ -64,34 +64,39 @@ export async function GET(request: Request) {
       .limit(batchSize)
       .toArray();
 
-    const extractedEmails: EmailDetails[] = emails.map((email) => ({
-      id: email.id,
-      threadId: email.threadId,
-      subject: email.payload.headers.find((header: EmailHeader) => header.name === 'Subject')?.value || 'No Subject',
-      snippet: email.snippet,
-      date: new Date(email.payload.headers.find((header: EmailHeader) => header.name === 'Date')?.value || '').toLocaleString('en-US', { month: 'short', year: 'numeric' }) || '',
-      from: email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown',
-      fromName: extractName(email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown'),
-      fromEmail: extractEmail(email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown'),
-      fromDomain: extractDomain(email.payload.headers.find((header: EmailHeader) => header.name === 'Authentication-Results')?.value || 'Unknown'),
-      isSubscription: !email.payload.headers.some((header: EmailHeader) => header.name === 'Subscribed') && (
-        email.payload.headers.some((header: EmailHeader) =>
-          header.name === 'List-Unsubscribe' ||
-          (header.name === 'Precedence' && (header.value === 'bulk' || header.value === 'list')) ||
-          header.name === 'X-Mailer' ||
-          header.name === 'X-Newsletter' ||
-          (header.name === 'From' &&
-            (header.value.includes('@news.') || header.value.includes('@mailchimp.com') ||
-              header.value.includes('@newsletter.') || header.value.includes('@marketing.') || 
-              header.value.includes('@info.') || header.value.includes('@updates.'))) ||
-          (header.name === 'Subject' &&
-            (header.value.toLowerCase().includes('newsletter') ||
-              header.value.toLowerCase().includes('digest')))
-        ) ||
-        (email.payload.parts?.['1']?.body?.data && /(<a\s+.*?href=".*?unsubscribe.*?">.*?<\/a>)/i.test(Buffer.from(email.payload.parts['1'].body.data, 'base64').toString('utf-8'))) ||
-        (email.payload.parts?.['1']?.body?.data && />\s*Unsubscribe\s*</i.test(Buffer.from(email.payload.parts['1'].body.data, 'base64').toString('utf-8')))
-      )
-    }));  
+    const extractedEmails: EmailDetails[] = emails
+      .filter(email => {
+        const fromEmail = extractEmail(email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown');
+        return fromEmail !== session.user?.email;
+      })
+      .map((email) => ({
+        id: email.id,
+        threadId: email.threadId,
+        subject: email.payload.headers.find((header: EmailHeader) => header.name === 'Subject')?.value || 'No Subject',
+        snippet: email.snippet,
+        date: new Date(email.payload.headers.find((header: EmailHeader) => header.name === 'Date')?.value || '').toLocaleString('en-US', { month: 'short', year: 'numeric' }) || '',
+        from: email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown',
+        fromName: extractName(email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown'),
+        fromEmail: extractEmail(email.payload.headers.find((header: EmailHeader) => header.name === 'From')?.value || 'Unknown'),
+        fromDomain: extractDomain(email.payload.headers.find((header: EmailHeader) => header.name === 'Authentication-Results')?.value || 'Unknown'),
+        isSubscription: !email.payload.headers.some((header: EmailHeader) => header.name === 'Subscribed') && (
+          email.payload.headers.some((header: EmailHeader) =>
+            header.name === 'List-Unsubscribe' ||
+            (header.name === 'Precedence' && (header.value === 'bulk' || header.value === 'list')) ||
+            header.name === 'X-Mailer' ||
+            header.name === 'X-Newsletter' ||
+            (header.name === 'From' &&
+              (header.value.includes('@news.') || header.value.includes('@mailchimp.com') ||
+                header.value.includes('@newsletter.') || header.value.includes('@marketing.') || 
+                header.value.includes('@info.') || header.value.includes('@updates.'))) ||
+            (header.name === 'Subject' &&
+              (header.value.toLowerCase().includes('newsletter') ||
+                header.value.toLowerCase().includes('digest')))
+          ) ||
+          (email.payload.parts?.['1']?.body?.data && /(<a\s+.*?href=".*?unsubscribe.*?">.*?<\/a>)/i.test(Buffer.from(email.payload.parts['1'].body.data, 'base64').toString('utf-8'))) ||
+          (email.payload.parts?.['1']?.body?.data && />\s*Unsubscribe\s*</i.test(Buffer.from(email.payload.parts['1'].body.data, 'base64').toString('utf-8')))
+        )
+      }));
 
     return NextResponse.json(extractedEmails);
   } catch (error) {
