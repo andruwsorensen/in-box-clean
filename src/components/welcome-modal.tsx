@@ -22,6 +22,7 @@ export default function WelcomeModal() {
     const [isOpen, setIsOpen] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState<ProcessingStatus | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
     // Process a batch of emails
@@ -67,6 +68,7 @@ export default function WelcomeModal() {
 
     const handleNext = async () => {
       try {
+        setError(null);
         setIsLoading(true);
 
         // Fetch the list of emails
@@ -116,6 +118,8 @@ export default function WelcomeModal() {
         setIsOpen(false);
         router.refresh();
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+        setError(errorMessage);
         console.error('Error processing emails:', error);
       } finally {
         setIsLoading(false);
@@ -173,7 +177,13 @@ export default function WelcomeModal() {
             </div>
           ) : (
             <CardDescription className="text-center text-black mt">
-              InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages.
+              {error ? (
+                <div className="text-red-500">
+                  Error: {error}
+                </div>
+              ) : (
+                "InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages."
+              )}
             </CardDescription>
           )}
         </div>
