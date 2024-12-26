@@ -64,15 +64,25 @@ export async function POST(request: Request) {
     const gmail = google.gmail({version: 'v1', auth: oauth2Client})
 
     try {
-        const res: GmailListMessagesResponse = await gmail.users.messages.list({
-            userId: 'me',
-            q: `from:${email}`
-        })
-        
-        const ids: string[] = res.data.messages?.map(msg => msg.id ?? '') ?? [];
+        let allIds: string[] = [];
+        let pageToken: string | undefined;
 
-        if (ids.length === 0) {
-            const deletedCount = await deleteEmailsFromDB(ids);
+        // Keep fetching pages until we get all messages
+        do {
+            const res: GmailListMessagesResponse = await gmail.users.messages.list({
+                userId: 'me',
+                q: `from:${email}`,
+                maxResults: 500, // Maximum allowed by Gmail API
+                pageToken: pageToken
+            });
+            
+            const pageIds = res.data.messages?.map(msg => msg.id ?? '') ?? [];
+            allIds = [...allIds, ...pageIds];
+            pageToken = res.data?.nextPageToken?.toString();
+        } while (pageToken);
+
+        if (allIds.length === 0) {
+            const deletedCount = await deleteEmailsFromDB(allIds);
             await updateDeletedCount(session, deletedCount);
             return NextResponse.json({ 
                 code: 200,
@@ -83,8 +93,8 @@ export async function POST(request: Request) {
 
         const batchSize = 100;
         const batches = [];
-        for (let i = 0; i < ids.length; i += batchSize) {
-            batches.push(ids.slice(i, i + batchSize));
+        for (let i = 0; i < allIds.length; i += batchSize) {
+            batches.push(allIds.slice(i, i + batchSize));
         }
 
         for (let i = 0; i < batches.length; i++) {
@@ -108,9 +118,9 @@ export async function POST(request: Request) {
             }
         }
 
-        console.log(`Batch moved ${ids.length} messages from ${email} to trash.`);
+        console.log(`Batch moved ${allIds.length} messages from ${email} to trash.`);
 
-        const deletedCount = await deleteEmailsFromDB(ids);
+        const deletedCount = await deleteEmailsFromDB(allIds);
         await updateDeletedCount(session, deletedCount);
 
         return NextResponse.json({ 
