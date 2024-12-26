@@ -3,6 +3,9 @@ import { getEmailDetails } from '@/app/api/utils/gmail';
 import { auth } from '@/auth';
 import { google } from 'googleapis';
 
+// Maximum size in bytes (20MB)
+const MAX_EMAIL_SIZE = 20 * 1024 * 1024;
+
 export async function POST(request: Request) {
     try {
         console.log('Fetching email details...');
@@ -29,9 +32,16 @@ export async function POST(request: Request) {
 
         const emailDetails = await Promise.all(emailIds.map(({ id }) => getEmailDetails(oAuth2Client, id)));
 
-        console.log(`Fetched details for ${emailDetails.filter(Boolean).length} emails`);
+        // Filter out emails that are too large
+        const filteredEmails = emailDetails.filter(email => {
+            if (!email) return false;
+            const size = JSON.stringify(email).length;
+            return size <= MAX_EMAIL_SIZE;
+        });
 
-        return NextResponse.json(emailDetails.filter(Boolean));
+        console.log(`Fetched details for ${filteredEmails.length} emails (${emailDetails.length - filteredEmails.length} were too large)`);
+
+        return NextResponse.json(filteredEmails);
     } catch (error) {
         console.error('Error getting email details:', error);
         return NextResponse.json({ error: 'Failed to get email details' }, { status: 500 });

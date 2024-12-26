@@ -3,10 +3,10 @@ import clientPromise from '@/lib/mongodb';
 import { auth } from '@/auth';
 
 export interface Stats {
-    unsubscribed: number;
-    deleted: number;
-    expires: number;
     userEmail: string;
+    deleted: number;
+    expires: string;
+    unsubscribed: number;
 }
 
 export async function GET() {
@@ -21,7 +21,16 @@ export async function GET() {
         const stats = await db.collection<Stats>('subscriptionStats').findOne({ userEmail: session.user.email });
 
         if (!stats) {
-            return NextResponse.json({ error: 'Stats not found' }, { status: 404 });
+            // Create default stats if none exist
+            const defaultStats: Stats = {
+                userEmail: session.user.email,
+                deleted: 0,
+                expires: session.expires,
+                unsubscribed: 0
+            };
+
+            await db.collection<Stats>('subscriptionStats').insertOne(defaultStats);
+            return NextResponse.json(defaultStats);
         }
 
         return NextResponse.json(stats);
@@ -47,7 +56,16 @@ export async function POST(request: Request) {
         const existingStats = await db.collection<Stats>('subscriptionStats').findOne({ userEmail: session.user.email });
 
         if (!existingStats) {
-            return NextResponse.json({ error: 'Stats not found' }, { status: 404 });
+            // Create default stats if none exist
+            const defaultStats: Stats = {
+                userEmail: session.user.email,
+                deleted: deleted || 0,
+                expires: session.expires,
+                unsubscribed: unsubscribed || 0
+            };
+
+            await db.collection<Stats>('subscriptionStats').insertOne(defaultStats);
+            return NextResponse.json({ code: 200, message: 'Stats created successfully' });
         }
 
         const updateQuery: Partial<Stats> = {
