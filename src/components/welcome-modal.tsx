@@ -79,18 +79,18 @@ export default function WelcomeModal() {
         const emails: EmailListItem[] = await listResponse.json();
         
         // Limit to 5000 emails
-        const limitedEmails = emails.slice(0, 6000);
+        const limitedEmails = emails.slice(0, 5000);
 
         // Initialize progress
         setProgress({
           processed: 0,
           total: limitedEmails.length,
           currentBatch: 0,
-          totalBatches: Math.ceil(limitedEmails.length / 250)
+          totalBatches: Math.ceil(limitedEmails.length / 150)
         });
 
         // Process in parallel batches of 250 emails
-        const batchSize = 250;
+        const batchSize = 150;
         const batches = [];
         
         for (let i = 0; i < limitedEmails.length; i += batchSize) {
