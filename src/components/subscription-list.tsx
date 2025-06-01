@@ -28,7 +28,7 @@ export function SubscriptionList() {
         try {
           setIsLoading(true);
           console.log('Fetching email count...');
-          const countResponse = await fetch('/api/subscriptions/count');
+          const countResponse = await fetch('/api/get-emails/count');
           if (!countResponse.ok) {
             throw new Error('Failed to fetch email count');
           }
@@ -38,7 +38,7 @@ export function SubscriptionList() {
           const groupedMap = new Map<string, GroupedEmail>();
 
           const fetchBatch = async (startIndex: number, batchSize: number) => {
-            const response = await fetch(`/api/subscriptions?startIndex=${startIndex}&batchSize=${batchSize}`);
+            const response = await fetch(`/api/get-emails?startIndex=${startIndex}&batchSize=${batchSize}`);
             if (!response.ok) {
               throw new Error('Failed to fetch email batch');
             }

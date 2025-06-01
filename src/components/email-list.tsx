@@ -1,51 +1,106 @@
 'use client'
-// components/EmailList.tsx
 import React, { useEffect, useState } from 'react';
-import { EmailDetails } from '../types';
+import { EmailGroup } from './email-group';
+import { useStats } from '../contexts/StatsContext';
+import { useSearchParams } from 'next/navigation';
 
-const EmailList: React.FC = () => {
-  const [emails, setEmails] = useState<EmailDetails[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+interface EmailGroupData {
+  fromEmail: string;
+  fromName: string;
+  fromDomain: string;
+  emailCount: number;
+  latestEmailDate: string;
+}
+
+export function EmailList() {
+  const [emailGroups, setEmailGroups] = useState<EmailGroupData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { incrementTrigger } = useStats();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const fetchEmails = async () => {
+    const fetchEmailGroups = async () => {
       try {
-        const response = await fetch('/api/emails');
-        const data = await response.json();
-
-        if (response.ok) {
-          setEmails(data);
-        } else {
-          console.error('Failed to fetch emails');
+        setIsLoading(true);
+        const response = await fetch('/api/get-emails/group-emails');
+        if (!response.ok) {
+          throw new Error('Failed to fetch email groups');
         }
+        const groups: EmailGroupData[] = await response.json();
+        setEmailGroups(groups);
       } catch (error) {
-        console.error('An error occurred while fetching emails', error);
+        console.error('Error fetching email groups:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchEmails();
+    fetchEmailGroups();
   }, []);
 
+  const handleStatsUpdate = async (deletedCount: number, unsubscribedCount: number) => {
+    console.log('handleStatsUpdate', { deletedCount, unsubscribedCount });
+    const response = await fetch('/api/stats', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ deleted: deletedCount, unsubscribed: unsubscribedCount })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update stats');
+    }
+
+    incrementTrigger();
+  };
+
+  const handleDelete = async (ids: string[]) => {
+    console.log('handleDelete', { ids });
+    const response = await fetch('/api/delete-emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ ids })
+    });
+  };
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 3 }, (_, i) => (
+          <div key={i} className="border rounded-lg p-4 animate-pulse">
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gray-200 rounded-lg mr-4"></div>
+              <div className="flex-1">
+                <div className="h-5 bg-gray-200 rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/5"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h2>Email List</h2>
-      <ul>
-        {emails.map((email) => (
-          <li key={email.id}>
-            <h3>{email.subject}</h3>
-            <p>{email.snippet}</p>
-            {/* Render other email details as needed */}
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-4">
+      {emailGroups.map((group) => (
+        <EmailGroup
+          key={group.fromEmail}
+          name={group.fromName}
+          email={group.fromEmail}
+          count={group.emailCount}
+          domain={group.fromDomain}
+          date={group.latestEmailDate}
+          onStatsUpdate={handleStatsUpdate}
+          onDelete={handleDelete}
+        />
+      ))}
     </div>
   );
-};
+}
 
 export default EmailList;

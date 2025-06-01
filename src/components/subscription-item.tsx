@@ -110,7 +110,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
       }
 
       if (!isUnsubscribe) {
-        const response = await fetch('/api/subscriptions', {
+        const response = await fetch('/api/get-emails', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -153,7 +153,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
               ) : (
                 <Image
                   src={domain === 'Loading...' ? 'https://via.placeholder.com/40' : `https://img.logo.dev/${domain}?token=pk_a9iCu7gpS1uTxP1K1fZeIw`}
-                  alt={name}
+                  alt={ name }
                   width={40}
                   height={40}
                   style={{
@@ -166,7 +166,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
               )}
               <div>
                 <h3 className="font-semibold">{ name }</h3>
-                <p className="text-sm text-gray-500">{email}</p>
+                <p className="text-sm text-gray-500">{ email }</p>
                 <p className="text-sm text-gray-500">
                   {count === 1 ? `${count} email` : `${count} emails`}
                   &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
