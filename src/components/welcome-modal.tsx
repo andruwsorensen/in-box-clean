@@ -72,6 +72,7 @@ export default function WelcomeModal() {
         setIsLoading(true);
 
         // Fetch the list of emails
+        console.log('Fetching emails list...');
         const listResponse = await fetch('/api/emails/list');
         if (!listResponse.ok) {
           throw new Error('Failed to fetch emails');

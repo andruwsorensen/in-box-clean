@@ -119,17 +119,17 @@ export function SubscriptionList() {
   if (isLoading || showModal) {
     return (
       <div className="space-y-4">
-        {Array.from({ length: 12 }, (_, i) => (
-          <SubscriptionItem
-            key={i}
-            name="Loading..."
-            email="Loading..."
-            count={0}
-            domain="Loading..."
-            from="Loading..."
-            date="Loading..."
-            onStatsUpdate={handleStatsUpdate}
-          />
+        {Array.from({ length: 5 }, (_, i) => (
+          <div key={i} className="border rounded-lg p-4 animate-pulse">
+            <div className="flex items-center">
+              <div className="w-16 h-16 bg-gray-200 rounded-lg mr-4"></div>
+              <div className="flex-1">
+                <div className="h-5 bg-gray-200 rounded w-1/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/5"></div>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     );

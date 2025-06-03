@@ -31,10 +31,12 @@ export function Sidebar() {
           <Trash2 className="mr-2" size={20} />
           Delete
         </Link>
+        {/* 
         <Link href="/main/all-emails" className={`block w-full text-left py-2 px-4 rounded ${pathname === '/main/all-emails' ? 'bg-gray-800' : 'hover:bg-gray-800'} flex items-center`}>
           <Mail className="mr-2" size={20} />
           All Emails
-        </Link>
+        </Link> 
+        */}
       </nav>
     </div>
   )

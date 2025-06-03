@@ -1,7 +1,7 @@
-import { Bell, Settings } from "lucide-react"
+import { Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Statistics } from "@/components/statistics"
-import { GetStarted } from "./get-started"
+// import { GetStarted } from "./get-started"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 
@@ -14,9 +14,9 @@ export default function RightSidebar() {
         <Button variant="ghost" size="icon">
           <Settings className="h-5 w-5" />
         </Button>
-        <Button variant="ghost" size="icon">
+        {/* <Button variant="ghost" size="icon">
           <Bell className="h-5 w-5" />
-        </Button>
+        </Button> */}
         {session?.user?.image && (
           <Image
             src={session.user.image}
@@ -28,7 +28,7 @@ export default function RightSidebar() {
         )}
       </div>
       <div className="mt-8 overflow-y-auto">
-        <GetStarted />
+        {/* <GetStarted /> */}
         <Statistics />
       </div>
     </div>

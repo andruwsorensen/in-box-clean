@@ -16,7 +16,8 @@ export function EmailList() {
   const [emailGroups, setEmailGroups] = useState<EmailGroupData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { incrementTrigger } = useStats();
-  const searchParams = useSearchParams();
+  
+  
 
   useEffect(() => {
     const fetchEmailGroups = async () => {
@@ -55,21 +56,24 @@ export function EmailList() {
     incrementTrigger();
   };
 
-  const handleDelete = async (ids: string[]) => {
-    console.log('handleDelete', { ids });
-    const response = await fetch('/api/delete-emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ ids })
+  const handleGroupUpdate = (fromEmail: string, deletedCount: number) => {
+    setEmailGroups(prevGroups => {
+      return prevGroups.map(group => {
+        if (group.fromEmail === fromEmail) {
+          const newCount = group.emailCount - deletedCount;
+          // If count reaches 0, filter out this group by returning null
+          return newCount > 0 ? { ...group, emailCount: newCount } : null;
+        }
+        return group;
+      }).filter(Boolean) as EmailGroupData[]; // Remove null entries
     });
   };
+
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {Array.from({ length: 3 }, (_, i) => (
+        {Array.from({ length: 5 }, (_, i) => (
           <div key={i} className="border rounded-lg p-4 animate-pulse">
             <div className="flex items-center">
               <div className="w-16 h-16 bg-gray-200 rounded-lg mr-4"></div>
@@ -96,7 +100,7 @@ export function EmailList() {
           domain={group.fromDomain}
           date={group.latestEmailDate}
           onStatsUpdate={handleStatsUpdate}
-          onDelete={handleDelete}
+          onGroupUpdate={handleGroupUpdate}
         />
       ))}
     </div>
