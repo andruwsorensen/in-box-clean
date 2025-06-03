@@ -28,7 +28,12 @@ export function SubscriptionList() {
         try {
           setIsLoading(true);
           console.log('Fetching email count...');
-          const countResponse = await fetch('/api/get-emails/count');
+          const countResponse = await fetch('/api/get-emails/count', {
+            headers: new Headers({
+              'Content-Type': 'application/json',
+              'x-server-token': process.env.SERVER_TOKEN || ''
+            })
+          });
           if (!countResponse.ok) {
             throw new Error('Failed to fetch email count');
           }
@@ -38,7 +43,12 @@ export function SubscriptionList() {
           const groupedMap = new Map<string, GroupedEmail>();
 
           const fetchBatch = async (startIndex: number, batchSize: number) => {
-            const response = await fetch(`/api/get-emails?startIndex=${startIndex}&batchSize=${batchSize}`);
+            const response = await fetch(`/api/get-emails?startIndex=${startIndex}&batchSize=${batchSize}`, {
+              headers: new Headers({
+                'Content-Type': 'application/json',
+                'x-server-token': process.env.SERVER_TOKEN || ''
+              })
+            });
             if (!response.ok) {
               throw new Error('Failed to fetch email batch');
             }
@@ -101,9 +111,10 @@ export function SubscriptionList() {
     console.log('handleStatsUpdate', { deletedCount, unsubscribedCount });
     const response = await fetch('/api/stats', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        'x-server-token': process.env.SERVER_TOKEN || ''
+      }),
       body: JSON.stringify({ deleted: deletedCount, unsubscribed: unsubscribedCount })
     });
 

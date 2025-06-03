@@ -17,7 +17,7 @@ export function Header() {
           title: 'Settings ⛭', 
           description: 'Customize your email management preferences and account settings.'
         }
-      case '/main/delete':
+      case '/delete':
         return {
           title: 'Delete Emails 🗑️',
           description: 'Safely remove individual emails or groups of messages from your inbox.'
@@ -26,6 +26,11 @@ export function Header() {
         return {
           title: 'All Emails 📥',
           description: 'View and organize all emails in your inbox.'
+        }
+      case '/subscriptions':
+        return {
+          title: 'Subscriptions 📧',
+          description: 'Manage your email subscriptions and unsubscribe from unwanted emails.'
         }
       default:
         return {

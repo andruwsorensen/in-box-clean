@@ -73,9 +73,10 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
 
         const unsubscribeResponse = await fetch('/api/unsubscribe', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'x-server-token': process.env.SERVER_TOKEN || ''
+          }),
           body: JSON.stringify({ 
             email: email,
           })
@@ -93,9 +94,10 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
       if (deleteEmails) {
         const response = await fetch('/api/emails/delete', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'x-server-token': process.env.SERVER_TOKEN || ''
+          }),
           body: JSON.stringify({ email })
         });
 
@@ -112,9 +114,10 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
       if (!isUnsubscribe) {
         const response = await fetch('/api/get-emails', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'x-server-token': process.env.SERVER_TOKEN || ''
+          }),
           body: JSON.stringify({ from })
         });
 

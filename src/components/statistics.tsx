@@ -14,7 +14,12 @@ export function Statistics() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/stats');
+      const response = await fetch('/api/stats', {
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          'x-server-token': process.env.SERVER_TOKEN || ''
+        })
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch stats');
       }

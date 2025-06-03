@@ -23,7 +23,12 @@ export function EmailList() {
     const fetchEmailGroups = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/get-emails/group-emails');
+        const response = await fetch('/api/get-emails/group-emails', {
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'x-server-token': process.env.SERVER_TOKEN || ''
+          })
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch email groups');
         }
@@ -43,9 +48,10 @@ export function EmailList() {
     console.log('handleStatsUpdate', { deletedCount, unsubscribedCount });
     const response = await fetch('/api/stats', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        'x-server-token': process.env.SERVER_TOKEN || ''
+      }),
       body: JSON.stringify({ deleted: deletedCount, unsubscribed: unsubscribedCount })
     });
 

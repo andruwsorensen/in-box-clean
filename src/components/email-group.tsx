@@ -86,7 +86,12 @@ export const EmailGroup: React.FC<EmailGroupProps> = ({
   const fetchEmails = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/get-emails/email-groups?fromEmail=${email}`)
+      const response = await fetch(`/api/get-emails/email-groups?fromEmail=${email}`, {
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          'x-server-token': process.env.SERVER_TOKEN || ''
+        })
+      })
       if (!response.ok) throw new Error("Failed to fetch emails")
       const data = await response.json()
       setEmails(sortEmails(data))
@@ -132,7 +137,10 @@ export const EmailGroup: React.FC<EmailGroupProps> = ({
       if (selectedEmails.size > 0) {
         const response = await fetch('/api/emails/delete-selected', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'x-server-token': process.env.SERVER_TOKEN || ''
+          }),
           body: JSON.stringify({ ids: Array.from(selectedEmails) })
         });
 
@@ -151,7 +159,10 @@ export const EmailGroup: React.FC<EmailGroupProps> = ({
         // Delete all emails from this sender
         const response = await fetch('/api/emails/delete', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'x-server-token': process.env.SERVER_TOKEN || ''
+          }),
           body: JSON.stringify({ email: email })
         });
 

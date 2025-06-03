@@ -29,7 +29,9 @@ export default function WelcomeModal() {
     async function processEmailBatch(batch: EmailListItem[]) {
       const detailsResponse = await fetch('/api/emails/details', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+          'x-server-token': process.env.SERVER_TOKEN || ''
+        },
         body: JSON.stringify(batch),
       });
       
@@ -73,7 +75,12 @@ export default function WelcomeModal() {
 
         // Fetch the list of emails
         console.log('Fetching emails list...');
-        const listResponse = await fetch('/api/emails/list');
+        const listResponse = await fetch('/api/emails/list', {
+          headers: new Headers({
+            'Content-Type': 'application/json',
+            'x-server-token': process.env.SERVER_TOKEN || ''
+          })
+        });
         if (!listResponse.ok) {
           throw new Error('Failed to fetch emails');
         }
