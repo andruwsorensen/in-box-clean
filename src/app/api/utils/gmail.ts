@@ -13,6 +13,11 @@ interface GmailListMessagesResponse extends GaxiosResponse<gmail_v1.Schema$ListM
     status: number;
 }
 
+interface EmailId {
+    id: string;
+    threadId: string;
+}
+
 export interface EmailDetails {
     id: string;
     threadId: string;

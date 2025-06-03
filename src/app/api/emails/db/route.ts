@@ -5,7 +5,7 @@ import clientPromise from '@/lib/mongodb';
 
 interface DatabaseOperationResult {
     inserted: number;
-    updated: number;
+    // updated: number;
 }
 
 export async function POST(request: Request) {
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
         const emails: EmailDetails[] = await request.json();
 
-        console.log('Received emails:', emails);
+        console.log('Received emails:', emails.length);
 
         if (emails.length === 0) {
             console.log('Email array is empty');
@@ -33,13 +33,10 @@ export async function POST(request: Request) {
 
         console.log('Checking for existing email IDs...');
         const existingEmailIds = await db.collection('emails').distinct('id');
-        console.log('Existing email IDs:', existingEmailIds);
 
         const emailsToInsert = emails.filter(email => !existingEmailIds.includes(email.id));
-        console.log('Emails to insert:', emailsToInsert);
 
-        const emailsToUpdate = emails.filter(email => existingEmailIds.includes(email.id));
-        console.log('Emails to update:', emailsToUpdate);
+        // const emailsToUpdate = emails.filter(email => existingEmailIds.includes(email.id));
 
         let insertResult = { insertedCount: 0 };
         if (emailsToInsert.length > 0) {
@@ -49,15 +46,15 @@ export async function POST(request: Request) {
             );
         }
 
-        let updateResult = { modifiedCount: 0 };
-        if (emailsToUpdate.length > 0) {
-            console.log(`Updating ${emailsToUpdate.length} existing emails...`);
-            updateResult = await db.collection('emails').updateMany(
-                { id: { $in: emailsToUpdate.map(email => email.id) } },
-                { $set: { userEmail, expires } }
-            );
-            console.log('Updated emails:', updateResult.modifiedCount);
-        }
+        // let updateResult = { modifiedCount: 0 };
+        // if (emailsToUpdate.length > 0) {
+        //     console.log(`Updating ${emailsToUpdate.length} existing emails...`);
+        //     updateResult = await db.collection('emails').updateMany(
+        //         { id: { $in: emailsToUpdate.map(email => email.id) } },
+        //         { $set: { userEmail, expires } }
+        //     );
+        //     console.log('Updated emails:', updateResult.modifiedCount);
+        // }
 
         // Use upsert to ensure only one stats document per user
         await db.collection('subscriptionStats').updateOne(
@@ -75,7 +72,7 @@ export async function POST(request: Request) {
 
         const result: DatabaseOperationResult = {
             inserted: insertResult.insertedCount,
-            updated: updateResult.modifiedCount
+            // updated: updateResult.modifiedCount
         };
 
         console.log('Database operations completed successfully:', result);

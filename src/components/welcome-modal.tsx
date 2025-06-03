@@ -87,22 +87,36 @@ export default function WelcomeModal() {
         const emails: EmailListItem[] = await listResponse.json();
         
         // Limit to 5000 emails
-        const limitedEmails = emails.slice(0, 5000);
+        // const limitedEmails = emails.slice(0, 5000);
+
+        // Only get emails not already in the database
+        const response = await fetch('/api/check-ids', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              ids: emails.map(email => email.id)
+          })
+      });
+      
+      const { newIds, count } = await response.json();
 
         // Initialize progress
         setProgress({
           processed: 0,
-          total: limitedEmails.length,
+          total: count,
           currentBatch: 0,
-          totalBatches: Math.ceil(limitedEmails.length / 150)
+          totalBatches: Math.ceil(count / 150)
         });
 
         // Process in parallel batches of 250 emails
         const batchSize = 150;
         const batches = [];
-        
-        for (let i = 0; i < limitedEmails.length; i += batchSize) {
-          batches.push(limitedEmails.slice(i, i + batchSize));
+        console.log(emails);
+        console.log(newIds);
+        for (let i = 0; i < count; i += batchSize) {
+          batches.push(newIds.slice(i, i + batchSize));
         }
 
         // Process 3 batches in parallel at a time

@@ -3,8 +3,8 @@ import { getEmailDetails } from '@/app/api/utils/gmail';
 import { auth } from '@/auth';
 import { google } from 'googleapis';
 
-// Maximum size in bytes (20MB)
-const MAX_EMAIL_SIZE = 20 * 1024 * 1024;
+// Maximum size in bytes (10MB)
+const MAX_EMAIL_SIZE = 10 * 1024 * 1024;
 
 export async function POST(request: Request) {
     try {
@@ -15,14 +15,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const emailIds: { id: string }[] = await request.json();
+        const ids: string[] = await request.json();
 
-        if (!emailIds || emailIds.length === 0) {
+        if (!Array.isArray(ids) || ids.length === 0) {
             console.error('No email IDs provided');
             return NextResponse.json({ error: 'Email IDs are required' }, { status: 400 });
         }
 
-        console.log(`Fetching details for ${emailIds.length} emails`);
+        console.log(`Fetching details for ${ids.length} emails`);
 
         const oAuth2Client = new google.auth.OAuth2();
         oAuth2Client.setCredentials({
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
             scope: session.scope,
         });
 
-        const emailDetails = await Promise.all(emailIds.map(({ id }) => getEmailDetails(oAuth2Client, id)));
+        const emailDetails = await Promise.all(ids.map( id  => getEmailDetails(oAuth2Client, id)));
 
         // Filter out emails that are too large
         const filteredEmails = emailDetails.filter(email => {

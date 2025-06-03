@@ -125,8 +125,6 @@ export function SubscriptionList() {
     incrementTrigger();
   };
 
-  console.log('Rendering SubscriptionList with groupedEmails:', groupedEmails);
-
   if (isLoading || showModal) {
     return (
       <div className="space-y-4">

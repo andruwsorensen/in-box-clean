@@ -13,7 +13,7 @@ export async function GET() {
   const count = await db.collection("count")
     .findOne({ access_token: session.access_token });
 
-  console.log(count);
+  // console.log('Count: ', count?.count);
   if (!count) {
     return NextResponse.json({ count: 0 });
   }
