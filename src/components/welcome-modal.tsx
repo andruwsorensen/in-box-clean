@@ -122,7 +122,7 @@ export default function WelcomeModal() {
           await Promise.all(batchPromises);
         }
 
-        router.replace('/main');
+        router.replace('/subscriptions');
         setIsOpen(false);
         router.refresh();
       } catch (error) {

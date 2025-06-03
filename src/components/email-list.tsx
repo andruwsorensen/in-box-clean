@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { EmailGroup } from './email-group';
 import { useStats } from '../contexts/StatsContext';
-import { useSearchParams } from 'next/navigation';
 
 interface EmailGroupData {
   fromEmail: string;

@@ -16,7 +16,7 @@ export function LandingPage() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn("google", { callbackUrl: "/main?showModal=true" });
+      await signIn("google", { callbackUrl: "/subscriptions?showModal=true" });
     } finally {
       setIsLoading(false);
     }

@@ -7,12 +7,12 @@ export function Header() {
 
   const getHeaderContent = () => {
     switch (pathname) {
-      case '/main/dashboard':
+      case '/dashboard':
         return {
           title: 'Dashboard 📊',
           description: 'Track your email cleanup progress and subscription management stats.'
         }
-      case '/main/settings':
+      case '/settings':
         return {
           title: 'Settings ⛭', 
           description: 'Customize your email management preferences and account settings.'
@@ -22,7 +22,7 @@ export function Header() {
           title: 'Delete Emails 🗑️',
           description: 'Safely remove individual emails or groups of messages from your inbox.'
         }
-      case '/main/all-emails':
+      case '/all-emails':
         return {
           title: 'All Emails 📥',
           description: 'View and organize all emails in your inbox.'

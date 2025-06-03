@@ -3,7 +3,12 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export async function middleware(request: NextRequest) {
-  // For API routes
+  // Allow auth-related API routes to pass through
+  if (request.nextUrl.pathname.startsWith('/api/auth')) {
+    return NextResponse.next()
+  }
+
+  // For other API routes
   if (request.nextUrl.pathname.startsWith('/api')) {
     // Check if it's a server-side request
     const serverToken = request.headers.get('x-server-token')

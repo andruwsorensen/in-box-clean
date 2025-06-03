@@ -130,10 +130,6 @@ export const EmailGroup: React.FC<EmailGroupProps> = ({
 
   const handleDeleteAll = async () => {
     try {
-      const idsToDelete = selectedEmails.size > 0 
-        ? Array.from(selectedEmails) 
-        : emails.map((email) => email.id);
-
       if (selectedEmails.size > 0) {
         const response = await fetch('/api/emails/delete-selected', {
           method: 'POST',
@@ -149,6 +145,7 @@ export const EmailGroup: React.FC<EmailGroupProps> = ({
         }
 
         const result = await response.json();
+        console.log('result', result)
         onStatsUpdate(selectedEmails.size, 0);
         onGroupUpdate(email, selectedEmails.size);  // Update group count
 
