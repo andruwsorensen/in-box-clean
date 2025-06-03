@@ -190,7 +190,7 @@ export default function WelcomeModal() {
                   Error: {error}
                 </div>
               ) : (
-                "InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old messages."
+                "InBoxClean helps you declutter your inbox by unsubscribing from unwanted emails and deleting old emails."
               )}
             </CardDescription>
           )}
