@@ -122,7 +122,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
         });
 
         if (!response.ok) {
-          throw new Error('Failed to update JSON file');
+          throw new Error('Failed to update DB');
         }
       }
 

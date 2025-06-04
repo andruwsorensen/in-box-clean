@@ -5,7 +5,6 @@ import clientPromise from '@/lib/mongodb';
 
 interface DatabaseOperationResult {
     inserted: number;
-    // updated: number;
 }
 
 export async function POST(request: Request) {
@@ -31,30 +30,10 @@ export async function POST(request: Request) {
         const userEmail = session.user.email;
         const expires = session.expires;
 
-        console.log('Checking for existing email IDs...');
-        const existingEmailIds = await db.collection('emails').distinct('id');
-
-        const emailsToInsert = emails.filter(email => !existingEmailIds.includes(email.id));
-
-        // const emailsToUpdate = emails.filter(email => existingEmailIds.includes(email.id));
-
-        let insertResult = { insertedCount: 0 };
-        if (emailsToInsert.length > 0) {
-            console.log(`Inserting ${emailsToInsert.length} new emails...`);
-            insertResult = await db.collection('emails').insertMany(
-                emailsToInsert.map(email => ({ ...email, userEmail, expires }))
-            );
-        }
-
-        // let updateResult = { modifiedCount: 0 };
-        // if (emailsToUpdate.length > 0) {
-        //     console.log(`Updating ${emailsToUpdate.length} existing emails...`);
-        //     updateResult = await db.collection('emails').updateMany(
-        //         { id: { $in: emailsToUpdate.map(email => email.id) } },
-        //         { $set: { userEmail, expires } }
-        //     );
-        //     console.log('Updated emails:', updateResult.modifiedCount);
-        // }
+        // Directly insert all received emails
+        const insertResult = await db.collection('emails').insertMany(
+            emails.map(email => ({ ...email, userEmail, expires }))
+        );
 
         // Use upsert to ensure only one stats document per user
         await db.collection('subscriptionStats').updateOne(
@@ -72,7 +51,6 @@ export async function POST(request: Request) {
 
         const result: DatabaseOperationResult = {
             inserted: insertResult.insertedCount,
-            // updated: updateResult.modifiedCount
         };
 
         console.log('Database operations completed successfully:', result);

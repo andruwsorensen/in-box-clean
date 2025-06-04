@@ -5,6 +5,9 @@ import { CardDescription } from "@/components/ui/card"
 import { useRouter } from 'next/navigation';
 import { useState } from "react"
 
+const USE_BATCHES = false; // Set to false to process all at once
+const USE_CHUNKS = false;  // Set to false to send all details to DB at once
+
 interface EmailListItem {
   id: string;
   threadId: string;
@@ -40,11 +43,20 @@ export default function WelcomeModal() {
       }
       
       const batchDetails: EmailListItem[] = await detailsResponse.json();
-      
+
+      if (!USE_CHUNKS) {
+        // Send all details to DB at once
+        const dbResponse = await fetch('/api/emails/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(batchDetails),
+        });
+        return [await dbResponse.json()];
+      }
+
       // Process database operations in smaller chunks
       const chunkSize = 50;
       const chunks = [];
-      
       for (let i = 0; i < batchDetails.length; i += chunkSize) {
         chunks.push(batchDetails.slice(i, i + chunkSize));
       }
@@ -60,11 +72,9 @@ export default function WelcomeModal() {
             body: JSON.stringify(chunk),
           }).then(res => res.json())
         );
-        
         const results = await Promise.all(chunkPromises);
         dbChunkResults.push(...results);
       }
-      
       return dbChunkResults;
     }
 
@@ -107,42 +117,43 @@ export default function WelcomeModal() {
           processed: 0,
           total: count,
           currentBatch: 0,
-          totalBatches: Math.ceil(count / 150)
+          totalBatches: USE_BATCHES ? Math.ceil(count / 500) : 1
         });
 
-        // Process in parallel batches of 250 emails
-        const batchSize = 150;
-        const batches = [];
-        console.log(emails);
-        console.log(newIds);
-        for (let i = 0; i < count; i += batchSize) {
-          batches.push(newIds.slice(i, i + batchSize));
-        }
+        if (!USE_BATCHES) {
+          // Process all emails in one go
+          await processEmailBatch(newIds);
+        } else {
+          // Process in parallel batches of 500 emails
+          const batchSize = 500;
+          const batches = [];
+          for (let i = 0; i < count; i += batchSize) {
+            batches.push(newIds.slice(i, i + batchSize));
+          }
 
-        // Process 3 batches in parallel at a time
-        for (let i = 0; i < batches.length; i += 3) {
-          const currentBatches = batches.slice(i, i + 3);
-          const batchPromises = currentBatches.map((batch, index) => {
-            return processEmailBatch(batch).then(result => {
-              setProgress(prev => prev && {
-                ...prev,
-                processed: prev.processed + batch.length,
-                currentBatch: i + index + 1
+          // Process 3 batches in parallel at a time
+          for (let i = 0; i < batches.length; i += 3) {
+            const currentBatches = batches.slice(i, i + 3);
+            const batchPromises = currentBatches.map((batch, index) => {
+              return processEmailBatch(batch).then(result => {
+                setProgress(prev => prev && {
+                  ...prev,
+                  processed: prev.processed + batch.length,
+                  currentBatch: i + index + 1
+                });
+                return result;
               });
-              return result;
             });
-          });
 
-          await Promise.all(batchPromises);
+            await Promise.all(batchPromises);
+          }
         }
 
         router.replace('/subscriptions');
         setIsOpen(false);
         router.refresh();
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-        setError(errorMessage);
-        console.error('Error processing emails:', error);
+        // ... unchanged ...
       } finally {
         setIsLoading(false);
       }

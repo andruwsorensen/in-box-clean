@@ -77,8 +77,8 @@ export function SubscriptionList() {
           };
 
           // Process in parallel batches
-          const batchSize = 500;
-          const parallelBatches = 3; // Number of batches to process in parallel
+          const batchSize = 1000;
+          const parallelBatches = 2; // Number of batches to process in parallel
           
           for (let startIndex = 0; startIndex < emailCount; startIndex += (batchSize * parallelBatches)) {
             const batchPromises = [];
