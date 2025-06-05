@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BellOff, Trash2, Mail } from 'lucide-react'
+import { BellOff, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import logo from '../public/images/logo.png'
 

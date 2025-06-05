@@ -1,5 +1,5 @@
-import { Settings } from "lucide-react"
-import { Button } from "@/components/ui/button"
+// import { Settings } from "lucide-react"
+// import { Button } from "@/components/ui/button"
 import { Statistics } from "@/components/statistics"
 import { useSession } from "next-auth/react"
 import { ProfilePopover } from "@/components/profile-popover"

@@ -13,6 +13,8 @@ interface EmailGroup {
 
 export async function GET(request: Request) {
   try {
+    // Do something with request
+    console.log(request);
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
