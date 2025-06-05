@@ -200,7 +200,7 @@ export default function WelcomeModal() {
             </div>
               {progress && progress.limitReached && (
                 <p className="text-sm text-yellow-600 text-center">
-                  Note: We've limited processing to the first {EMAIL_LIMIT} emails due to system constraints.
+                  Note: We&apos;ve limited processing to the first {EMAIL_LIMIT} emails due to system constraints.
                 </p>
               )}
               <p className="text-sm text-center">
