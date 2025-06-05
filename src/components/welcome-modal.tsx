@@ -5,9 +5,6 @@ import { CardDescription } from "@/components/ui/card"
 import { useRouter } from 'next/navigation';
 import { useState } from "react"
 
-const USE_BATCHES = false; // Set to false to process all at once
-const USE_CHUNKS = false;  // Set to false to send all details to DB at once
-
 interface EmailListItem {
   id: string;
   threadId: string;
@@ -19,6 +16,10 @@ interface ProcessingStatus {
   total: number;
   currentBatch: number;
   totalBatches: number;
+  currentStep: string;
+  detailsProgress: number;
+  dbProgress: number;
+  limitReached: boolean;
 }
 
 export default function WelcomeModal() {
@@ -27,9 +28,16 @@ export default function WelcomeModal() {
     const [progress, setProgress] = useState<ProcessingStatus | null>(null);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const EMAIL_LIMIT = 5000;
 
-    // Process a batch of emails
-    async function processEmailBatch(batch: EmailListItem[]) {
+    async function processEmailBatch(batch: EmailListItem[], batchNumber: number): Promise<any[]> {
+      setProgress(prev => ({
+        ...prev!,
+        detailsProgress: 0,
+        currentStep: `Processing batch ${batchNumber}`,
+        dbProgress: 0
+      }));
+
       const detailsResponse = await fetch('/api/emails/details', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json',
@@ -44,38 +52,30 @@ export default function WelcomeModal() {
       
       const batchDetails: EmailListItem[] = await detailsResponse.json();
 
-      if (!USE_CHUNKS) {
-        // Send all details to DB at once
-        const dbResponse = await fetch('/api/emails/db', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(batchDetails),
-        });
-        return [await dbResponse.json()];
-      }
+      setProgress(prev => ({
+        ...prev!,
+          detailsProgress: 100,
+          currentStep: `Saving batch ${batchNumber}`,
+          dbProgress: 0
+      }));
 
-      // Process database operations in smaller chunks
-      const chunkSize = 50;
-      const chunks = [];
-      for (let i = 0; i < batchDetails.length; i += chunkSize) {
-        chunks.push(batchDetails.slice(i, i + chunkSize));
-      }
-      
-      // Process database chunks in parallel (5 at a time)
-      const dbChunkResults = [];
-      for (let i = 0; i < chunks.length; i += 5) {
-        const currentChunks = chunks.slice(i, i + 5);
-        const chunkPromises = currentChunks.map(chunk =>
-          fetch('/api/emails/db', {
+      const dbResponse = await fetch('/api/emails/db', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(chunk),
-          }).then(res => res.json())
-        );
-        const results = await Promise.all(chunkPromises);
-        dbChunkResults.push(...results);
+            body: JSON.stringify(batchDetails),
+      });
+
+      if (!dbResponse.ok) {
+          throw new Error(`Failed to save batch ${batchNumber}`);
       }
-      return dbChunkResults;
+
+      setProgress(prev => ({
+        ...prev!,
+          dbProgress: 100,
+        processed: prev!.processed + batch.length
+      }));
+
+      return [await dbResponse.json()];
     }
 
     const handleNext = async () => {
@@ -83,7 +83,6 @@ export default function WelcomeModal() {
         setError(null);
         setIsLoading(true);
 
-        // Fetch the list of emails
         console.log('Fetching emails list...');
         const listResponse = await fetch('/api/emails/list', {
           headers: new Headers({
@@ -96,67 +95,57 @@ export default function WelcomeModal() {
         }
         const emails: EmailListItem[] = await listResponse.json();
         
-        // Limit to 5000 emails
-        // const limitedEmails = emails.slice(0, 5000);
+        const limitReached = emails.length > EMAIL_LIMIT;
+        const limitedEmails = emails.slice(0, EMAIL_LIMIT);
 
-        // Only get emails not already in the database
         const response = await fetch('/api/check-ids', {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-              ids: emails.map(email => email.id)
+              ids: limitedEmails.map(email => email.id)
           })
       });
       
       const { newIds, count } = await response.json();
+        const batchSize = 500;
+        const batches = [];
+        for (let i = 0; i < count; i += batchSize) {
+          batches.push(newIds.slice(i, i + batchSize));
+        }
 
-        // Initialize progress
         setProgress({
           processed: 0,
           total: count,
           currentBatch: 0,
-          totalBatches: USE_BATCHES ? Math.ceil(count / 500) : 1
+          totalBatches: batches.length,
+          currentStep: 'Starting',
+          detailsProgress: 0,
+          dbProgress: 0,
+          limitReached
         });
-
-        if (!USE_BATCHES) {
-          // Process all emails in one go
-          await processEmailBatch(newIds);
-        } else {
-          // Process in parallel batches of 500 emails
-          const batchSize = 500;
-          const batches = [];
-          for (let i = 0; i < count; i += batchSize) {
-            batches.push(newIds.slice(i, i + batchSize));
-          }
-
-          // Process 3 batches in parallel at a time
-          for (let i = 0; i < batches.length; i += 3) {
-            const currentBatches = batches.slice(i, i + 3);
-            const batchPromises = currentBatches.map((batch, index) => {
-              return processEmailBatch(batch).then(result => {
-                setProgress(prev => prev && {
-                  ...prev,
-                  processed: prev.processed + batch.length,
-                  currentBatch: i + index + 1
-                });
-                return result;
-              });
-            });
-
-            await Promise.all(batchPromises);
-          }
-        }
+        for (let i = 0; i < batches.length; i++) {
+          const batch = batches[i];
+          await processEmailBatch(batch, i + 1);
+          setProgress(prev => ({
+            ...prev!,
+            currentBatch: i + 1
+          }));
+        }        
 
         router.replace('/subscriptions');
         setIsOpen(false);
         router.refresh();
       } catch (error) {
-        // ... unchanged ...
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError('An unknown error occurred');
+      }
       } finally {
         setIsLoading(false);
-      }
+    }
     }
 
     const headerContent = isLoading ? null : (
@@ -179,6 +168,7 @@ export default function WelcomeModal() {
       >
         <div className="space-y-4">
           {isLoading ? (
+            <>
             <div className="relative w-32 h-32 mx-auto">
               <svg className="w-full h-full" viewBox="0 0 100 100">
                 <circle
@@ -208,6 +198,15 @@ export default function WelcomeModal() {
                 <span className="text-2xl font-semibold">{Math.round((progress ? (progress.processed / progress.total) : 0) * 100)}%</span>
               </div>
             </div>
+              {progress && progress.limitReached && (
+                <p className="text-sm text-yellow-600 text-center">
+                  Note: We've limited processing to the first {EMAIL_LIMIT} emails due to system constraints.
+                </p>
+              )}
+              <p className="text-sm text-center">
+                Processed {progress ? progress.processed : 0} of {progress ? progress.total : 0} emails
+              </p>
+            </>
           ) : (
             <CardDescription className="text-center text-black mt">
               {error ? (

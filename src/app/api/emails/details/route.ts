@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getEmailDetails } from '@/app/api/utils/gmail';
+import { getEmailDetailsBatch } from '@/app/api/utils/gmail';
 import { auth } from '@/auth';
 import { google } from 'googleapis';
 
 // Maximum size in bytes (10MB)
 const MAX_EMAIL_SIZE = 10 * 1024 * 1024;
+const BATCH_SIZE = 100;
 
 export async function POST(request: Request) {
     try {
@@ -30,7 +31,14 @@ export async function POST(request: Request) {
             scope: session.scope,
         });
 
-        const emailDetails = await Promise.all(ids.map( id  => getEmailDetails(oAuth2Client, id)));
+        const emailDetails = [];
+        for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+            const batchIds = ids.slice(i, i + BATCH_SIZE);
+            const batchResults = await getEmailDetailsBatch(oAuth2Client, batchIds);
+            emailDetails.push(...batchResults);
+        }
+
+
 
         // Filter out emails that are too large
         const filteredEmails = emailDetails.filter(email => {

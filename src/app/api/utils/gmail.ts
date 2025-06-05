@@ -1,8 +1,10 @@
 import { OAuth2Client } from 'google-auth-library';
 import { GaxiosResponse } from 'gaxios';
 import { google, gmail_v1 } from 'googleapis';
+import pLimit from 'p-limit';
 
 const gmail = google.gmail('v1');
+const CONCURRENT_REQUESTS = 100; // Adjust based on Gmail's rate limits
 
 interface EmailId {
     id: string;
@@ -79,4 +81,27 @@ export const getEmailDetails = async (auth: OAuth2Client, messageId: string): Pr
         console.error('Error getting email details:', err);
         return null;
     }
+};
+
+export const getEmailDetailsBatch = async (auth: OAuth2Client, messageIds: string[]): Promise<(gmail_v1.Schema$Message | null)[]> => {
+    const limit = pLimit(CONCURRENT_REQUESTS);
+    
+    const requests = messageIds.map(id => 
+        limit(async () => {
+            try {
+                const response = await gmail.users.messages.get({
+                    userId: 'me',
+                    id: id,
+                    auth,
+                    format: 'full',
+                });
+                return response.data;
+            } catch (err) {
+                console.error(`Error getting email details for ${id}:`, err);
+                return null;
+            }
+        })
+    );
+
+    return Promise.all(requests);
 };
