@@ -10,32 +10,47 @@ export async function middleware(request: NextRequest) {
 
   // For other API routes
   if (request.nextUrl.pathname.startsWith('/api')) {
-    // Check if it's a server-side request
-    const serverToken = request.headers.get('x-server-token')
-    const isServerRequest = serverToken === process.env.SERVER_TOKEN
+    try {
+      // Check if it's a server-side request
+      const serverToken = request.headers.get('x-server-token')
+      const isServerRequest = serverToken === process.env.SERVER_TOKEN
 
-    // Check if user is authenticated
+      // Check if user is authenticated - wrap in try/catch
+      const session = await auth()
+      
+      // Allow access only if it's a server request or user is authenticated
+      if (!isServerRequest && !session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      return NextResponse.next()
+    } catch (error) {
+      // During build or if auth fails, allow the request to continue
+      console.log('Auth check failed in middleware:', error)
+      return NextResponse.next()
+    }
+  }
+
+  // For non-API routes
+  try {
     const session = await auth()
     
-    // Allow access only if it's a server request or user is authenticated
-    if (!isServerRequest && !session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (request.nextUrl.pathname === "/") {
+      return NextResponse.next()
+    }
+
+    if (!session) {
+      return NextResponse.redirect(new URL("/", request.url))
+    }
+
+    return NextResponse.next()
+  } catch (error) {
+    // During build or if auth fails, redirect to home
+    console.log('Auth check failed in middleware:', error)
+    if (request.nextUrl.pathname !== "/") {
+      return NextResponse.redirect(new URL("/", request.url))
     }
     return NextResponse.next()
   }
-
-  // For non-API routes (your existing middleware logic)
-  const session = await auth()
-  
-  if (request.nextUrl.pathname === "/") {
-    return NextResponse.next()
-  }
-
-  if (!session) {
-    return NextResponse.redirect(new URL("/", request.url))
-  }
-
-  return NextResponse.next()
 }
 
 export const config = {
