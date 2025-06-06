@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    trustHost: true,
     reactStrictMode: true,
     images: {
       formats: ['image/avif', 'image/webp'],
