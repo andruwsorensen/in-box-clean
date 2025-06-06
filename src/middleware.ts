@@ -58,4 +58,5 @@ export const config = {
     // Match all paths except static files, etc.
     '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
+  runtime: 'nodejs',
 }
