@@ -19,7 +19,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId : process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      checks: ['state'],
       authorization: {
         params: {
           prompt: 'consent',
@@ -30,36 +29,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
     })
   ],
-  cookies: {
-    pkceCodeVerifier: {
-      name: '__Secure-authjs.pkce.code_verifier',
-      options: {
-        httpOnly: true,
-        sameSite: 'none',
-        path: '/',
-        secure: true,
-      },
-    },
-    csrfToken: {
-      name: '__Host-authjs.csrf-token',
-      options: {
-        httpOnly: true,
-        sameSite: 'none',
-        path: '/',
-        secure: true,
-      },
-    },
-    callbackUrl: {
-      name: '__Secure-authjs.callback-url',
-      options: {
-        sameSite: 'none',
-        path: '/',
-        secure: true,
-      },
-    },
-  },
   callbacks: {
     authorized: async ({ auth, request }) => {
+      // Logged in users are authenticated, otherwise redirect to root
       if (!auth?.access_token && request.nextUrl.pathname !== "/") {
         return NextResponse.redirect(new URL("/", request.url))
       }
