@@ -5,7 +5,7 @@ import { google } from 'googleapis';
 
 // Maximum size in bytes (10MB)
 const MAX_EMAIL_SIZE = 10 * 1024 * 1024;
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 1;
 
 export async function POST(request: Request) {
     try {
