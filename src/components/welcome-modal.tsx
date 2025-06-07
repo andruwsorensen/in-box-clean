@@ -110,7 +110,7 @@ export default function WelcomeModal() {
       
       const { newIds, count } = await response.json();
       //? Change this if you want it to work on Vercel, probably to 100
-        const batchSize = 50;
+        const batchSize = 10;
         const batches = [];
         for (let i = 0; i < count; i += batchSize) {
           batches.push(newIds.slice(i, i + batchSize));
