@@ -24,13 +24,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           prompt: 'consent',
           access_type: 'offline',
           response_type: 'code',
-          scope: "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/gmail.settings.sharing https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"        }
+          scope: "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.settings.basic https://www.googleapis.com/auth/gmail.settings.sharing https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+        }
       }
     })
   ],
+  cookies: {
+    pkceCodeVerifier: {
+      name: '__Secure-authjs.pkce.code_verifier',
+      options: {
+        httpOnly: true,
+        sameSite: 'none',
+        path: '/',
+        secure: true,
+      },
+    },
+    csrfToken: {
+      name: '__Host-authjs.csrf-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'none',
+        path: '/',
+        secure: true,
+      },
+    },
+    callbackUrl: {
+      name: '__Secure-authjs.callback-url',
+      options: {
+        sameSite: 'none',
+        path: '/',
+        secure: true,
+      },
+    },
+  },
   callbacks: {
     authorized: async ({ auth, request }) => {
-      // Logged in users are authenticated, otherwise redirect to root
       if (!auth?.access_token && request.nextUrl.pathname !== "/") {
         return NextResponse.redirect(new URL("/", request.url))
       }
