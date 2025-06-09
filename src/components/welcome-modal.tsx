@@ -28,7 +28,7 @@ export default function WelcomeModal() {
     const [progress, setProgress] = useState<ProcessingStatus | null>(null);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const EMAIL_LIMIT = 5000;
+    const EMAIL_LIMIT = 40000; // Limit for processing emails, adjust as needed
 
     async function processEmailBatch(batch: EmailListItem[], batchNumber: number): Promise<unknown[]> {
       setProgress(prev => ({
