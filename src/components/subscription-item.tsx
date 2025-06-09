@@ -126,7 +126,6 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
         }
       }
 
-      // Handle successful confirmation
       console.log(`${isUnsubscribe ? 'Unsubscribed' : 'Kept subscription'} successfully`);
       setIsUnsubscribed(isUnsubscribe);
       setIsKeepingSubscription(!isUnsubscribe);
@@ -141,8 +140,23 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
     }
   }
 
+  const handleKeepClick = () => {
+                setIsDialogOpen(true);
+    setIsUnsubscribeAction(false);
+  }
+
+  const handleUnsubscribeClick = () => {
+    setIsDialogOpen(true);
+    setIsUnsubscribeAction(true);
+  }
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setIsUnsubscribeAction(false);
+  }
+
   if (isUnsubscribed || isKeepingSubscription) {
-    return null; // Don't render the component if unsubscribed or kept subscription
+    return null;
   }
 
   return (
@@ -178,13 +192,10 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
               </div>
             </div>
             <div className="flex">
-              <Button variant="outline" className="mr-2" onClick={() => setIsDialogOpen(true)}>
+              <Button variant="outline" className="mr-2" onClick={handleKeepClick}>
                 <ThumbsUp className="mr-2" />  Keep
               </Button>
-              <Button variant="outline" onClick={() => {
-                setIsDialogOpen(true);
-                setIsUnsubscribeAction(true);
-              }}>
+              <Button variant="outline" onClick={handleUnsubscribeClick}>
                 <ThumbsDown className="mr-2" /> Unsubscribe
               </Button>
             </div>
@@ -193,7 +204,7 @@ export const SubscriptionItem: React.FC<SubscriptionItemProps> = ({
       </Card>
       <ConfirmationDialog
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={handleDialogClose}
         onConfirm={handleConfirmation}
         serviceName={name.split('<')[0]}
         isUnsubscribe={isUnsubscribeAction}

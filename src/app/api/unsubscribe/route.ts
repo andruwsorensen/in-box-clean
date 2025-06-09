@@ -8,7 +8,7 @@ import { auth } from '@/auth';
 
 const gmail = google.gmail('v1');
 
-async function createBlockFilter(auth: OAuth2Client, gmail: gmail_v1.Gmail, sender: string) {
+async function createBlockFilter(auth: OAuth2Client, gmail: gmail_v1.Gmail, sender: string): Promise<boolean> {
     try {
       const filter = {
         criteria: {
@@ -20,20 +20,34 @@ async function createBlockFilter(auth: OAuth2Client, gmail: gmail_v1.Gmail, send
         },
       };
   
-      await gmail.users.settings.filters.create({
+      const response = await gmail.users.settings.filters.create({
         userId: 'me',
         requestBody: filter,
         auth,
       });
   
-      console.log(`Created filter to block emails from ${sender}`);
+      if (response.status === 200) {
+        console.log(`Created filter to block emails from ${sender}`);
+        return true;
+      } else {
+        console.error(`Failed to create filter for ${sender}: Unexpected status ${response.status}`);
+        return false;
+      }
     } catch (error) {
       console.error(`Failed to create filter for ${sender}:`, error);
+      return false;
     }
   }
 
 export async function POST(request: Request) {
   const { email } = await request.json();
+
+  if (!email || typeof email !== 'string' || email.trim() === '') {
+    return NextResponse.json(
+      { error: 'Invalid or missing sender email address' },
+      { status: 400 }
+    );
+  }
 
   // // 1. Check for unsubscribe link in headers
   // const parsedEmail = await simpleParser(emailContent);
@@ -91,7 +105,14 @@ export async function POST(request: Request) {
   const oAuth2Client = new google.auth.OAuth2();
   oAuth2Client.setCredentials({access_token: session.access_token});
   
-  await createBlockFilter(oAuth2Client, gmail, email);
-  console.log('Blocking email');
+  const filterCreated = await createBlockFilter(oAuth2Client, gmail, email);
+  if (!filterCreated) {
+    return NextResponse.json(
+      { error: 'Failed to create email filter' },
+      { status: 500 }
+    );
+  }
+
+  console.log('Successfully blocked email');
   return NextResponse.json({ success: true, method: 'block' });
 }
