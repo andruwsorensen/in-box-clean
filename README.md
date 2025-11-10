@@ -1,62 +1,58 @@
-# In-Box Clean: Gmail Subscription Manager
+# in-box-clean
 
-In-Box Clean is a Next.js application designed to help users manage their Gmail subscriptions efficiently. It provides an intuitive interface for viewing, organizing, and unsubscribing from email subscriptions.
+**in-box-clean** is a tool designed to help users manage and declutter their email inboxes. With support for various email providers and easy-to-use workflows, it enables you to automate sorting, archiving, and deleting unwanted emails, helping you maintain a clean and organized inbox.
 
 ## Features
 
-- OAuth2 authentication with Gmail
-- View and manage email subscriptions
-- Unsubscribe from unwanted newsletters
-- User-friendly interface built with Next.js and Tailwind CSS
+- **Bulk Delete:** Quickly remove unwanted emails by sender, date, or category.
+- **Archiving:** Move old or less important emails to your archive automatically.
+- **Spam Handling:** Identify and remove spam or promotional messages.
+- **Custom Rules:** Set up rules to automatically sort incoming mail.
+- **Multi-provider Support:** Works with major email providers (e.g., Gmail, Outlook, Yahoo).
+
+## Tech Stack
+
+This project leverages modern technologies for maximum efficiency and reliability:
+
+- **Python:** For core logic, backend processing, and email handling.
+- **JavaScript:** Powers any interactive frontend or command-line interface.
+- **IMAP/SMTP Libraries:** Used for direct interaction with email servers.
+- **(Add additional frameworks, libraries, or cloud services as appropriate...)**
 
 ## Getting Started
 
-To run In-Box Clean locally, follow these steps:
-
-1. Clone the repository:
+1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/in-box-clean.git
+   git clone https://github.com/andruwsorensen/in-box-clean.git
    cd in-box-clean
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
    ```bash
+   pip install -r requirements.txt
+   # or, for JavaScript portions, if any
    npm install
    ```
 
-3. Set up environment variables:
-   Create a `.env.local` file in the root directory and add your Google OAuth credentials:
-   ```
-   GOOGLE_CLIENT_ID=your_client_id
-   GOOGLE_CLIENT_SECRET=your_client_secret
-   ```
+3. **Configuration:**
+   - Set your email account credentials in the configuration file.
+   - Adjust rule settings as desired.
 
-4. Run the development server:
+4. **Run the tool:**
    ```bash
-   npm run dev
+   python main.py
+   # or
+   npm start
    ```
-
-5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
-
-## Project Structure
-
-- `src/app`: Contains the main application pages and routing
-- `src/components`: Reusable React components
-- `src/lib`: Utility functions and API handlers
-- `src/hooks`: Custom React hooks
-- `public`: Static assets
-
-## Technologies Used
-
-- [Next.js](https://nextjs.org/): React framework for building the application
-- [Tailwind CSS](https://tailwindcss.com/): For styling
-- [shadcn/ui](https://ui.shadcn.com/): UI component library
-- [Google Gmail API](https://developers.google.com/gmail/api): For accessing and managing Gmail data
 
 ## Contributing
 
-Contributions to In-Box Clean are welcome! Please feel free to submit a Pull Request.
+Contributions and suggestions are welcome! Please fork the repo, submit a pull request, or open an issue for discussion.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
+
+---
+
+*Questions or feedback? Feel free to open an issue!*
