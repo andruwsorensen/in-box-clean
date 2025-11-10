@@ -1,20 +1,23 @@
 # in-box-clean
 
-**in-box-clean** is a tool designed to help users manage and declutter their email inboxes. With future support for various email providers (currently just gmail) and easy-to-use workflows, it enables you to mass delete emails and view subscription based emails to unsubscribe from.
+**in-box-clean** is a web app designed to help users explore, analyze, and declutter their email inboxes—principally Gmail—by leveraging OAuth authentication and modern browser-based workflows. The app provides a friendly UI for querying your mailbox, assessing bulk messages, and taking action, all while keeping your credentials secure.
 
 ## Features
 
-- **Bulk Delete:** Quickly remove unwanted emails by sender, date, or category.
-- **Spam Handling:** Identify and remove spam or promotional messages.
+- **Gmail OAuth Authentication:** Sign in with your Google account securely (no backend storage of credentials).
+- **Inbox Analysis:** Identify patterns by sender, label, or other attributes to inform bulk actions.
+- **Bulk Actions:** Select groups of emails for deletion or archiving.
+- **Safe Preview:** See affected messages before deletion.
+- **Modern UI:** Fast, responsive interface.
 
 ## Tech Stack
 
-This project leverages modern technologies for maximum efficiency and reliability:
-
-- **Python:** For core logic, backend processing, and email handling.
-- **JavaScript:** Powers any interactive frontend or command-line interface.
-- **IMAP/SMTP Libraries:** Used for direct interaction with email servers.
-- **(Add additional frameworks, libraries, or cloud services as appropriate...)**
+- **TypeScript & JavaScript:** All application logic and UI.
+- **React (Next.js):** Full client app and SSR workflow.
+- **TailwindCSS:** Styling and responsive design.
+- **Google APIs (OAuth, Gmail):** Direct integration with your mailbox.
+- **ESLint, Prettier:** Code style enforcement.
+- **Vercel, Node.js:** Deployment and server-side functions (no Python involved).
 
 ## Getting Started
 
@@ -26,30 +29,21 @@ This project leverages modern technologies for maximum efficiency and reliabilit
 
 2. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt
-   # or, for JavaScript portions, if any
    npm install
    ```
 
-3. **Configuration:**
-   - Set your email account credentials in the configuration file.
-   - Adjust rule settings as desired.
+3. **Set up Google API credentials:**
+   - Create OAuth client credentials in Google Cloud Console.
+   - Copy/paste credentials into an `.env.local` file.
 
-4. **Run the tool:**
+4. **Run locally:**
    ```bash
-   python main.py
-   # or
-   npm start
+   npm run dev
    ```
 
 ## Contributing
 
-Contributions and suggestions are welcome! Please fork the repo, submit a pull request, or open an issue for discussion.
+Pull requests, suggestions, and issues are welcome. See the repo for guidance or open an issue to start a discussion.
 
-## License
 
-This project is licensed under the MIT License.
-
----
-
-*Questions or feedback? Feel free to open an issue!*
+_Questions or feedback? Please open an issue._
