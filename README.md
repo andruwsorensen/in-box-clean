@@ -1,14 +1,11 @@
 # in-box-clean
 
-**in-box-clean** is a tool designed to help users manage and declutter their email inboxes. With support for various email providers and easy-to-use workflows, it enables you to automate sorting, archiving, and deleting unwanted emails, helping you maintain a clean and organized inbox.
+**in-box-clean** is a tool designed to help users manage and declutter their email inboxes. With future support for various email providers (currently just gmail) and easy-to-use workflows, it enables you to mass delete emails and view subscription based emails to unsubscribe from.
 
 ## Features
 
 - **Bulk Delete:** Quickly remove unwanted emails by sender, date, or category.
-- **Archiving:** Move old or less important emails to your archive automatically.
 - **Spam Handling:** Identify and remove spam or promotional messages.
-- **Custom Rules:** Set up rules to automatically sort incoming mail.
-- **Multi-provider Support:** Works with major email providers (e.g., Gmail, Outlook, Yahoo).
 
 ## Tech Stack
 
